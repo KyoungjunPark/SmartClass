@@ -15,7 +15,7 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:textSize="30sp"
-        android:text="Login Screen"
+        android:text="Login Activity"
         android:id="@+id/textView" />
 
     <TextView
