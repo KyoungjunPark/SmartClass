@@ -1,3 +1,7 @@
+<!--
+  ~ Copyright (c) 2015. Kyoungjun Park. All Rights Reserved.
+  -->
+
 <resources>
     <string name="app_name">SmartClass</string>
     <string name="action_settings">Settings</string>

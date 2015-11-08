@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2015. Kyoungjun Park. All Rights Reserved.
+ */
+
 package com.example.kjpark.smartclass;
 
 import android.app.Application;
