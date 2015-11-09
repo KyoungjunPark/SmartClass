@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2015. Kyoungjun Park. All Rights Reserved.
+  -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+
+
+    <ImageButton
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/register_teacher"
+        android:fitsSystemWindows="true"
+        android:contentDescription="Teacher"
+        android:layout_weight="1"
+        android:clickable="true" />
+    <ImageButton
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/register_student"
+        android:fitsSystemWindows="true"
+        android:contentDescription="Student"
+        android:layout_weight="1"
+        android:clickable="true"/>
+    <ImageButton
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/register_parent"
+        android:fitsSystemWindows="true"
+        android:contentDescription="SchoolParent"
+        android:layout_weight="1"
+        android:clickable="true"/>
+</LinearLayout>

@@ -4,17 +4,19 @@
 
 package com.example.kjpark.smartclass;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
-public class LoginActivity extends AppCompatActivity {
+public class StartActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.activity_start);
 
     }
 
@@ -40,4 +42,14 @@ public class LoginActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    public void onNewAccountButtonClicked(View v)
+    {
+        Intent intent = new Intent(StartActivity.this, JoinActivity.class);
+        startActivity(intent);
+    }
+    public void onLoginButtonClicked(View v)
+    {
+        Intent intent = new Intent(StartActivity.this, LoginActivity.class);
+        startActivity(intent);
+    }
 }
