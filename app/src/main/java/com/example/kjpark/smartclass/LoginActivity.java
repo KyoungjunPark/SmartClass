@@ -4,17 +4,37 @@
 
 package com.example.kjpark.smartclass;
 
+import android.content.Intent;
+import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 
 public class LoginActivity extends AppCompatActivity {
+
+    TextView emailTextView;
+    TextView passwordTextView;
+    TextView newAccountButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        emailTextView = (TextView)findViewById(R.id.emailTextView);
+        passwordTextView = (TextView)findViewById(R.id.passwordTextView);
+        newAccountButton = (Button)findViewById(R.id.newAccountButton);
+
+        //fonts setting
+        Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/NanumPen.ttf");
+        emailTextView.setTypeface(typeface);
+        passwordTextView.setTypeface(typeface);
+        newAccountButton.setTypeface(typeface);
 
     }
 
@@ -39,5 +59,8 @@ public class LoginActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
-
+    public void onNewAccountButtonClicked(View v){
+        Intent intent = new Intent(LoginActivity.this, JoinActivity.class);
+        startActivity(intent);
+    }
 }
