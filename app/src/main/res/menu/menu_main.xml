@@ -13,6 +13,5 @@
         android:title="User"
         android:icon="@drawable/ic_action"
         app:showAsAction="ifRoom">
-
     </item>
 </menu>
