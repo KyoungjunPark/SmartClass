@@ -6,11 +6,12 @@ package com.example.kjpark.smartclass;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.ListFragment;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -21,24 +22,40 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class MainActivity extends FragmentActivity {
-    static final int NUM_ITEMS = 3;
+public class MainActivity extends AppCompatActivity {
 
+    private Toolbar toolbar;
     ViewPager viewPager;
-    CollectionPagerAdapter pagerAdapter;
+    ViewPagerAdapter adapter;
+    SlidingTabLayout tabs;
+    CharSequence Titles[] = {"공지사항","과제방","추억 공간", "메세지"};
+    int NumOfTabs = 4;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_main);
+        setContentView(R.layout.activity_main);
+
+        toolbar = (Toolbar) findViewById(R.id.tool_bar);
+        setSupportActionBar(toolbar);
+
+        adapter = new ViewPagerAdapter(getSupportFragmentManager(), Titles, NumOfTabs);
 
         viewPager = (ViewPager) findViewById(R.id.viewPager);
+        viewPager.setAdapter(adapter);
 
-        pagerAdapter = new CollectionPagerAdapter(getSupportFragmentManager());
+        tabs = (SlidingTabLayout) findViewById(R.id.tabs);
+        tabs.setDistributeEvenly(true);
 
-        viewPager.setAdapter(pagerAdapter);
+        tabs.setCustomTabColorizer(new SlidingTabLayout.TabColorizer() {
+            @Override
+            public int getIndicatorColor(int position) {
+                return getResources().getColor(R.color.tabsScrollColor);
+            }
+        });
 
-
+        tabs.setViewPager(viewPager);
     }
 
     @Override
@@ -62,63 +79,6 @@ public class MainActivity extends FragmentActivity {
 
         return super.onOptionsItemSelected(item);
     }
-    public static class CollectionPagerAdapter extends FragmentPagerAdapter{
 
 
-        public CollectionPagerAdapter(FragmentManager fm) {
-            super(fm);
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            return ArrayListFragment.newInstance(position);
-        }
-
-        @Override
-        public int getCount() {
-            return NUM_ITEMS;
-        }
-    }
-    public static class ArrayListFragment extends ListFragment{
-
-        int mNum;
-        public static final String[] tabNames = {"aa","bb","cc"};
-
-        static ArrayListFragment newInstance(int num){
-            ArrayListFragment f = new ArrayListFragment();
-
-            Bundle args = new Bundle();
-            args.putInt("num", num);
-            f.setArguments(args);
-
-            return f;
-        }
-
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            mNum  = getArguments() != null ? getArguments().getInt("num") : 1;
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            View v = inflater.inflate(R.layout.fragment_main_list, container, false);
-            View tv = v.findViewById(R.id.text);
-            ((TextView)tv).setText("Fragment #" + mNum);
-            return v;
-        }
-
-        @Override
-        public void onActivityCreated(Bundle savedInstanceState) {
-            super.onActivityCreated(savedInstanceState);
-            setListAdapter(new ArrayAdapter<String>(getActivity(),
-                    android.R.layout.simple_list_item_1, tabNames));
-        }
-
-        @Override
-        public void onListItemClick(ListView l, View v, int position, long id) {
-            Log.i("FragmentList", "Item clicked: " + id);
-        }
-
-    }
 }
