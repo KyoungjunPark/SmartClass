@@ -219,7 +219,19 @@ public class SlidingTabLayout extends HorizontalScrollView {
             tabTitleView.setTextColor(getResources().getColorStateList(R.color.selector));
             tabTitleView.setTextSize(14);
 
-            tabTitleView.setText(adapter.getPageTitle(i));
+            if(adapter.getPageTitle(i) == "설정"){
+                tabTitleView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_setting, 0, 0, 0);
+            } else if(adapter.getPageTitle(i) == "메세지") {
+                tabTitleView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_message, 0, 0, 0);
+            } else if(adapter.getPageTitle(i) == "추억 공간"){
+                tabTitleView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_memory, 0, 0, 0);
+            } else if(adapter.getPageTitle(i) == "과제방"){
+                tabTitleView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_assignment, 0, 0, 0);
+            } else if(adapter.getPageTitle(i) == "공지사항"){
+                tabTitleView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_notice, 0, 0, 0);
+            } else {
+                tabTitleView.setText(adapter.getPageTitle(i));
+            }
             tabView.setOnClickListener(tabClickListener);
             String desc = mContentDescriptions.get(i, null);
             if (desc != null) {

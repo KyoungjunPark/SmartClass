@@ -11,14 +11,16 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+
 public class MainActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
     ViewPager viewPager;
     ViewPagerAdapter adapter;
     SlidingTabLayout tabs;
-    CharSequence Titles[] = {"공지사항","과제방","추억 공간", "메세지"};
-    int NumOfTabs = 4;
+    CharSequence Titles[] = {"공지사항","과제방","추억 공간", "메세지", "설정"};
+    int NumOfTabs = 5;
 
 
     @Override
@@ -50,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        //getMenuInflater().inflate(R.menu.menu_user, menu);
         return true;
     }
 
@@ -71,6 +73,4 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
-
-
 }

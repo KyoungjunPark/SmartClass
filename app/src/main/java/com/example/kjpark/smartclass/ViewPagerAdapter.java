@@ -29,8 +29,12 @@ public class ViewPagerAdapter extends FragmentStatePagerAdapter {
             return new AssignmentTab();
         else if(position == 2)
             return new MemoryTab();
-        else
+        else if(position == 3)
             return new MessageTab();
+        else {
+            return new SettingTab();
+        }
+
     }
     @Override
     public CharSequence getPageTitle(int position) {
