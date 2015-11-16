@@ -4,5 +4,6 @@
 
 <resources>
     <string name="app_name">SmartClass</string>
+    <string name="profile">Profile</string>
     <string name="action_settings">Settings</string>
 </resources>

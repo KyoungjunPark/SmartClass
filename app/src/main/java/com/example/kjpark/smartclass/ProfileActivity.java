@@ -5,46 +5,35 @@
 package com.example.kjpark.smartclass;
 
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Bundle;
-import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-public class MainActivity extends AppCompatActivity {
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.TextView;
+
+public class ProfileActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
-    ViewPager viewPager;
-    ViewPagerAdapter adapter;
-    SlidingTabLayout tabs;
-    CharSequence Titles[] = {"공지사항","과제방","추억 공간", "메세지"};
-    int NumOfTabs = 4;
 
+    private ListView listView = null;
+    private ProfileListViewAdapter adapter = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_profile);
 
         toolbar = (Toolbar) findViewById(R.id.tool_bar);
-        setSupportActionBar(toolbar);
+        toolbar.setTitle(R.string.profile);
 
-        adapter = new ViewPagerAdapter(getSupportFragmentManager(), Titles, NumOfTabs);
-
-        viewPager = (ViewPager) findViewById(R.id.viewPager);
-        viewPager.setAdapter(adapter);
-
-        tabs = (SlidingTabLayout) findViewById(R.id.tabs);
-        tabs.setDistributeEvenly(true);
-
-        tabs.setCustomTabColorizer(new SlidingTabLayout.TabColorizer() {
-            @Override
-            public int getIndicatorColor(int position) {
-                return getResources().getColor(R.color.tabsScrollColor);
-            }
-        });
-
-        tabs.setViewPager(viewPager);
     }
 
     @Override
@@ -64,13 +53,41 @@ public class MainActivity extends AppCompatActivity {
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
-        } else if(id == R.id.action_user){
-            Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
-            startActivity(intent);
         }
 
         return super.onOptionsItemSelected(item);
     }
 
+    private class ViewHolder {
+        public ImageView mIcon;
+        public TextView mText;
+        public TextView mType;
+    }
+    private class ListViewAdapter extends BaseAdapter {
+        private Context mContext;
+        private ArrayList<List>
+        @Override
+        public int getCount() {
+            return 0;
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return null;
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return 0;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            return null;
+        }
+
+        private
+
+    }
 
 }
