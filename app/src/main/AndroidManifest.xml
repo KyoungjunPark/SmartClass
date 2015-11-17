@@ -49,6 +49,10 @@
             android:label="@string/boardNotice"
             android:theme="@style/AppTheme.NoActionBar" >
         </activity>
+        <activity android:name=".BoardAssignmentActivity"
+            android:label="@string/boardAssignment"
+            android:theme="@style/AppTheme.NoActionBar" >
+        </activity>
     </application>
 
 </manifest>
