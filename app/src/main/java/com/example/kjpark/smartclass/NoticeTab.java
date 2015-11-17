@@ -1,11 +1,13 @@
 package com.example.kjpark.smartclass;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -30,5 +32,19 @@ public class NoticeTab extends Fragment{
         inflater.inflate(R.menu.menu_write, menu);
         super.onCreateOptionsMenu(menu, inflater);
     }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if(id == R.id.action_write){
+            Intent intent = new Intent(getActivity(), BoardNoticeActivity.class);
+            getActivity().startActivity(intent);
+        }
+
+
+        return true;
+    }
+
 
 }
