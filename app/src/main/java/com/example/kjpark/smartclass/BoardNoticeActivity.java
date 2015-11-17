@@ -1,9 +1,11 @@
 package com.example.kjpark.smartclass;
 
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -36,6 +38,7 @@ import java.util.Calendar;
  */
 public class BoardNoticeActivity extends AppCompatActivity implements TimePickerDialog.OnTimeSetListener, DatePickerDialog.OnDateSetListener{
 
+    private final String TAG = "BoardNoticeActivity";
     private Toolbar toolbar;
     private Button startDate;
     private Button startTime;
@@ -89,14 +92,35 @@ public class BoardNoticeActivity extends AppCompatActivity implements TimePicker
 
     @Override
     public void onDateSet(DatePickerDialog view, int year, int monthOfYear, int dayOfMonth) {
-        String date = "You picked the following date: "+dayOfMonth+"/"+(monthOfYear+1)+"/"+year;
-        //dateTextView.setText(date);
+        //Log.d(TAG, view.getTag());
+
+        if(view.getTag().equals("StartDatepickerdialog")){
+            String week = getWeek(year, monthOfYear, dayOfMonth);
+            startDate.setText(year+"년 "+monthOfYear+"월 "+dayOfMonth+"일 "+"("+week+")");
+
+        }else if(view.getTag().equals("EndDatepickerdialog")){
+            String week = getWeek(year, monthOfYear, dayOfMonth);
+            endDate.setText(year+"년 "+monthOfYear+"월 "+dayOfMonth+"일 "+"("+week+")");
+        }
     }
 
     @Override
     public void onTimeSet(RadialPickerLayout view, int hourOfDay, int minute, int second) {
-        String time = "You picked the following time: "+hourOfDay+"h"+minute;
-        //timeTextView.setText(time);
+        String timeTag = null;
+
+
+        if(hourOfDay >= 12){
+            timeTag = "오후";
+            if(hourOfDay != 12)
+                hourOfDay -= 12;
+        }else{
+            timeTag = "오전";
+        }
+        if(this.getFragmentManager().findFragmentByTag("StartTimepickerdialog") != null){
+            startTime.setText(timeTag + " "+hourOfDay+":"+minute);
+        }else if(this.getFragmentManager().findFragmentByTag("EndTimepickerdialog") != null){
+            endTime.setText(timeTag + " "+hourOfDay+":"+minute);
+        }
     }
     public void onStartDateClicked(View v){
 
@@ -107,7 +131,7 @@ public class BoardNoticeActivity extends AppCompatActivity implements TimePicker
                 now.get(Calendar.MONTH),
                 now.get(Calendar.DAY_OF_MONTH)
         );
-        dpd.show(getFragmentManager(), "Datepickerdialog");
+        dpd.show(getFragmentManager(), "StartDatepickerdialog");
 
     }
     public void onStartTimeClicked(View v){
@@ -118,7 +142,7 @@ public class BoardNoticeActivity extends AppCompatActivity implements TimePicker
                 now.get(Calendar.MINUTE),
                 true
         );
-        dpd.show(getFragmentManager(), "Timepickerdialog");
+        dpd.show(getFragmentManager(), "StartTimepickerdialog");
 
     }
     public void onEndDateClicked(View v){
@@ -129,7 +153,7 @@ public class BoardNoticeActivity extends AppCompatActivity implements TimePicker
                 now.get(Calendar.MONTH),
                 now.get(Calendar.DAY_OF_MONTH)
         );
-        dpd.show(getFragmentManager(), "Datepickerdialog");
+        dpd.show(getFragmentManager(), "EndDatepickerdialog");
     }
     public void onEndTimeClicked(View v){
         Calendar now = Calendar.getInstance();
@@ -139,7 +163,42 @@ public class BoardNoticeActivity extends AppCompatActivity implements TimePicker
                 now.get(Calendar.MINUTE),
                 true
         );
-        dpd.show(getFragmentManager(), "Timepickerdialog");
+        dpd.show(getFragmentManager(), "EndTimepickerdialog");
 
+    }
+    private String getWeek(int Year, int Month, int Date)
+    {
+        String week = null;
+
+        Calendar cal = Calendar.getInstance();
+
+        cal.set(Calendar.YEAR, Year);
+        cal.set(Calendar.MONTH, Month);
+        cal.set(Calendar.DATE, Date);
+
+        switch(cal.get(Calendar.DAY_OF_WEEK)){
+            case 1:
+                week = "일";
+                break;
+            case 2:
+                week = "월";
+                break;
+            case 3:
+                week = "화";
+                break;
+            case 4:
+                week = "수";
+                break;
+            case 5:
+                week = "목";
+                break;
+            case 6:
+                week = "금";
+                break;
+            case 7:
+                week = "토";
+                break;
+        }
+        return week;
     }
 }
