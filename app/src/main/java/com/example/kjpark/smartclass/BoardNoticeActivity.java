@@ -1,26 +1,16 @@
 package com.example.kjpark.smartclass;
 
 import android.app.AlertDialog;
-import android.app.PendingIntent;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
-
-import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
-import com.wdullaer.materialdatetimepicker.time.RadialPickerLayout;
-import com.wdullaer.materialdatetimepicker.time.TimePickerDialog;
-
-import java.util.Calendar;
 
 /**
  * Created by parkk on 2015-11-17.
@@ -52,7 +42,7 @@ public class BoardNoticeActivity extends AppCompatActivity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_board_notice);
+        setContentView(R.layout.activity_edit_notice);
 
         toolbar = (Toolbar) findViewById(R.id.tool_bar);
         setToolbar();
@@ -112,7 +102,7 @@ public class BoardNoticeActivity extends AppCompatActivity{
             @Override
             public void onClick(View v) {
                 //if user typing any words.. then handling it!
-                if(isAnyInputExist()){
+                if (isAnyInputExist()) {
                     //question that are you really want to go out
                     AlertDialog.Builder builder = new AlertDialog.Builder(BoardNoticeActivity.this);
                     builder.setTitle("변경을 취소하시겠어요?");
@@ -132,7 +122,7 @@ public class BoardNoticeActivity extends AppCompatActivity{
                     AlertDialog dialog = builder.create();
                     dialog.show();
 
-                } else{
+                } else {
                     //go out directly
                     onBackPressed();
                 }

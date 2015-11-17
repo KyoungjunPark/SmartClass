@@ -44,12 +44,12 @@ public class NoticeTab extends Fragment{
         listView.setAdapter(adapter);
 
         adapter.addNotice(getResources().getDrawable(R.drawable.ic_action)
-                , "과제해"
-                , "2015년 11월 22일 까지");
+                , "공지1"
+                , "2015년 11월 22일");
 
         adapter.addNotice(getResources().getDrawable(R.drawable.ic_action)
-                ,"과제해2"
-                ,"2015년 11월 23일 까지");
+                ,"공지2"
+                ,"2015년 11월 23일");
 
         return view;
     }
