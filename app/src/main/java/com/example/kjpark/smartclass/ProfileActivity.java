@@ -7,13 +7,17 @@ package com.example.kjpark.smartclass;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.AttributeSet;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -26,7 +30,7 @@ import org.w3c.dom.Text;
 public class ProfileActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
-    private ImageView profileImageView;
+    private de.hdodenhof.circleimageview.CircleImageView profileImageView;
     private TextView nameTextView;
     private TextView emailTextView;
 
@@ -41,7 +45,7 @@ public class ProfileActivity extends AppCompatActivity {
         toolbar.setTitle(R.string.profile);
         setToolbar();
 
-        profileImageView = (ImageView) findViewById(R.id.profileImageView);
+        profileImageView = (de.hdodenhof.circleimageview.CircleImageView) findViewById(R.id.profileImageView);
         nameTextView = (TextView) findViewById(R.id.nameTextView);
         emailTextView = (TextView) findViewById(R.id.emailTextView);
         profileImageLayout = (RelativeLayout) findViewById(R.id.profileImageLayout);
@@ -86,25 +90,21 @@ public class ProfileActivity extends AppCompatActivity {
     }
     private void resizeImage()
     {
-        Bitmap bmp = BitmapFactory.decodeResource(getResources(), R.drawable.profile);
-        int width = (int) (getWindowManager().getDefaultDisplay().getWidth());
-        int height = (int) (getWindowManager().getDefaultDisplay().getHeight()*0.8);
-        Bitmap resizedBmp = Bitmap.createScaledBitmap(bmp, width, height, true);
-        profileImageView.setImageBitmap(resizedBmp);
+        Bitmap bmp = decodeSampledBitmapFromResource(getResources(), R.drawable.profile, 80, 80);
+        profileImageView.setImageBitmap(bmp);
+
     }
     private void setBackgroundImage()
     {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
 
-        int width = (int) (getWindowManager().getDefaultDisplay().getWidth());
-        int height = (int) (getWindowManager().getDefaultDisplay().getHeight()*0.8);
+        Bitmap bmp = decodeSampledBitmapFromResource(getResources(), R.drawable.profile_background, 200, 100);
+        bmp = toGrayScale(bmp);
+        BitmapDrawable bmpDrawable = new BitmapDrawable(getResources(), bmp);
 
-        Bitmap bmp = decodeSampledBitmapFromResource(getResources(), R.drawable.profile_background,width, height);
-        Bitmap resizedBmp = Bitmap.createScaledBitmap(bmp, width, height, true);
-        BitmapDrawable bmpDrawable = new BitmapDrawable(getResources(), resizedBmp);
         profileImageLayout.setBackground(bmpDrawable);
-        profileImageLayout.
+
 
     }
     public static Bitmap decodeSampledBitmapFromResource(Resources res, int resId,
@@ -142,5 +142,26 @@ public class ProfileActivity extends AppCompatActivity {
         }
 
         return inSampleSize;
+    }
+    public Bitmap toGrayScale(Bitmap bmpOriginal)
+    {
+        int width, height;
+        height = bmpOriginal.getHeight();
+        width = bmpOriginal.getWidth();
+
+        Bitmap bmpGrayscale = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas c = new Canvas(bmpGrayscale);
+        Paint paint = new Paint();
+        ColorMatrix cm = new ColorMatrix();
+        cm.setSaturation(0);
+        ColorMatrixColorFilter f = new ColorMatrixColorFilter(cm);
+        paint.setColorFilter(f);
+        c.drawBitmap(bmpOriginal, 0, 0, paint);
+        return bmpGrayscale;
+    }
+    public void onProfileChangeImageViewClicked(View v)
+    {
+        SpinnerTextView spinnerTextView = new SpinnerTextView(getApplicationContext());
+        an
     }
 }

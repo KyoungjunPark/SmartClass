@@ -2,6 +2,9 @@
 <!--
   ~ Copyright (c) 2015. Kyoungjun Park. All Rights Reserved.
   -->
-
 <resources>
+  <declare-styleable name="SpinnerTextView">
+    <attr name="android:prompt" />
+    <attr name="android:entries" />
+  </declare-styleable>
 </resources>
