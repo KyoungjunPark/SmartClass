@@ -4,6 +4,9 @@
 
 package com.example.kjpark.smartclass;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -14,10 +17,14 @@ import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,14 +34,68 @@ import android.widget.TextView;
 
 import org.w3c.dom.Text;
 
+import java.io.File;
+
 public class ProfileActivity extends AppCompatActivity {
 
+    private final static String TAG = "ProfileActivity";
     private Toolbar toolbar;
     private de.hdodenhof.circleimageview.CircleImageView profileImageView;
     private TextView nameTextView;
     private TextView emailTextView;
 
     private RelativeLayout profileImageLayout;
+
+    private static final int PICK_FROM_GALLERY = 1000;
+    private static final int PICK_FROM_CAMERA = 1001;
+    private static final int CROP_FROM_CAMERA = 1002;
+
+    private Uri mImageCaptureUri;
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(resultCode != RESULT_OK)
+            return;
+
+        switch(requestCode){
+            case CROP_FROM_CAMERA:
+            {
+                final Bundle extras = data.getExtras();
+
+                if(extras != null){
+                    Bitmap photo = extras.getParcelable("data");
+                    profileImageView.setImageBitmap(photo);
+                }
+
+                File f = new File(mImageCaptureUri.getPath());
+                if(f.exists())
+                    f.delete();
+
+                break;
+            }
+            case PICK_FROM_GALLERY:
+            {
+                mImageCaptureUri = data.getData();
+            }
+            case PICK_FROM_CAMERA:
+            {
+                Intent intent = new Intent("com.android.camera.action.CROP");
+                intent.setDataAndType(mImageCaptureUri, "image/*");
+
+                intent.putExtra("outputX", 150);
+                intent.putExtra("outputY", 150);
+                intent.putExtra("aspectX", 1);
+                intent.putExtra("aspectY", 1);
+                intent.putExtra("scale", true);
+                intent.putExtra("return-data", true);
+                startActivityForResult(intent, CROP_FROM_CAMERA);
+
+                break;
+            }
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,7 +151,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
     private void resizeImage()
     {
-        Bitmap bmp = decodeSampledBitmapFromResource(getResources(), R.drawable.profile, 80, 80);
+        Bitmap bmp = decodeSampledBitmapFromResource(getResources(), R.drawable.profile, 500, 500);
         profileImageView.setImageBitmap(bmp);
 
     }
@@ -161,7 +222,39 @@ public class ProfileActivity extends AppCompatActivity {
     }
     public void onProfileChangeImageViewClicked(View v)
     {
-        SpinnerTextView spinnerTextView = new SpinnerTextView(getApplicationContext());
-        an
+        CharSequence selections[] = new CharSequence[] {"사진 앨범","카메라"};
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("사진선택");
+        builder.setItems(selections, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (which == 0) {
+                    //the case: 사진 앨범
+                    getPhotoFromGallery();
+                } else if (which == 1) {
+                    //the case: 카메라
+                    getPhotoFromCamera();
+                }
+            }
+        });
+        builder.show();
     }
+    private void getPhotoFromGallery()
+    {
+        Intent intent = new Intent(Intent.ACTION_PICK);
+        intent.setType(MediaStore.Images.Media.CONTENT_TYPE);
+        startActivityForResult(intent, PICK_FROM_GALLERY);
+    }
+    private void getPhotoFromCamera()
+    {
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+        String url = "tmp_" + String.valueOf(System.currentTimeMillis()) + ".jpg";
+        mImageCaptureUri = Uri.fromFile(new File(Environment.getExternalStorageDirectory(), url));
+
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, mImageCaptureUri);
+        startActivityForResult(intent, PICK_FROM_CAMERA);
+    }
+
 }

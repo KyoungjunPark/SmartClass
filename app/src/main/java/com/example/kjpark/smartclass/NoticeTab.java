@@ -2,6 +2,8 @@ package com.example.kjpark.smartclass;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.ColorFilter;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -13,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -43,13 +46,15 @@ public class NoticeTab extends Fragment{
         listView = (ListView) view.findViewById(R.id.listView);
         listView.setAdapter(adapter);
 
-        adapter.addNotice(getResources().getDrawable(R.drawable.ic_action)
-                , "공지1"
-                , "2015년 11월 22일");
+        adapter.addNotice(getResources().getDrawable(R.drawable.ic_warning)
+                , "공지qwewqwqeqewqe1"
+                , "2015년 11월 22일"
+                ,getResources().getDrawable(R.drawable.ic_sign));
 
-        adapter.addNotice(getResources().getDrawable(R.drawable.ic_action)
+        adapter.addNotice(null
                 ,"공지2"
-                ,"2015년 11월 23일");
+                ,"2015년 11월 23일"
+                , null);
 
         return view;
     }
@@ -78,6 +83,7 @@ public class NoticeTab extends Fragment{
         public ImageView mIcon;
         public TextView mTitle;
         public TextView mDate;
+        public ImageButton mSignButton;
     }
     private class ListViewAdapter extends BaseAdapter{
 
@@ -111,11 +117,12 @@ public class NoticeTab extends Fragment{
                 holder = new ViewHolder();
 
                 LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                convertView = inflater.inflate(R.layout.listview_assignmentitem, null);
+                convertView = inflater.inflate(R.layout.listview_noticeitem, null);
 
                 holder.mIcon = (ImageView) convertView.findViewById(R.id.mImage);
                 holder.mTitle = (TextView) convertView.findViewById(R.id.mText);
                 holder.mDate = (TextView) convertView.findViewById(R.id.mDate);
+                holder.mSignButton = (ImageButton) convertView.findViewById(R.id.signImageButton);
 
                 convertView.setTag(holder);
             } else{
@@ -123,11 +130,16 @@ public class NoticeTab extends Fragment{
             }
             NoticeListData mData = mListData.get(position);
 
+            holder.mIcon.setVisibility(View.VISIBLE);
             if(mData.mIcon != null){
-                holder.mIcon.setVisibility(View.VISIBLE);
                 holder.mIcon.setImageDrawable(mData.mIcon);
             } else{
-                holder.mIcon.setVisibility(View.GONE);
+            }
+            if(mData.mSign != null){
+                holder.mSignButton.setVisibility(View.VISIBLE);
+                holder.mSignButton.setImageDrawable(mData.mSign);
+            } else{
+                holder.mSignButton.setVisibility(View.GONE);
             }
 
             holder.mTitle.setText(mData.mTitle);
@@ -135,12 +147,13 @@ public class NoticeTab extends Fragment{
 
             return convertView;
         }
-        public void addNotice(Drawable icon, String mTitle, String mDate)
+        public void addNotice(Drawable icon, String mTitle, String mDate, Drawable sign)
         {
             NoticeListData addInfo = new NoticeListData();
             addInfo.mIcon = icon;
             addInfo.mTitle = mTitle;
             addInfo.mDate = mDate;
+            addInfo.mSign = sign;
 
             mListData.add(addInfo);
         }

@@ -11,10 +11,9 @@ import java.util.Comparator;
 public class NoticeListData {
 
     public Drawable mIcon;
-
     public String mTitle;
-
     public String mDate;
+    public Drawable mSign;
 
     //alphabetical order
     public static final Comparator<NoticeListData> ALPHA_COMPARATOR = new Comparator<NoticeListData>() {
