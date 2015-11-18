@@ -94,18 +94,18 @@ public class ProfileActivity extends AppCompatActivity {
     }
     private void setBackgroundImage()
     {
-
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
 
-        int width = options.outWidth;
-        int height = options.outHeight;
-
+        int width = (int) (getWindowManager().getDefaultDisplay().getWidth());
+        int height = (int) (getWindowManager().getDefaultDisplay().getHeight()*0.8);
 
         Bitmap bmp = decodeSampledBitmapFromResource(getResources(), R.drawable.profile_background,width, height);
-
-        BitmapDrawable bmpDrawable = new BitmapDrawable(bmp);
+        Bitmap resizedBmp = Bitmap.createScaledBitmap(bmp, width, height, true);
+        BitmapDrawable bmpDrawable = new BitmapDrawable(getResources(), resizedBmp);
         profileImageLayout.setBackground(bmpDrawable);
+        profileImageLayout.
+
     }
     public static Bitmap decodeSampledBitmapFromResource(Resources res, int resId,
                                                          int reqWidth, int reqHeight) {
