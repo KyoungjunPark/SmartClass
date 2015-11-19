@@ -1,12 +1,18 @@
 package com.example.kjpark.smartclass;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 import com.wdullaer.materialdatetimepicker.time.RadialPickerLayout;
@@ -42,6 +48,9 @@ public class BoardAssignmentActivity extends AppCompatActivity implements TimePi
     private Button endDate;
     private Button endTime;
 
+    private EditText titleEditText;
+    private EditText contentEditText;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,6 +63,9 @@ public class BoardAssignmentActivity extends AppCompatActivity implements TimePi
         startTime = (Button) findViewById(R.id.startTime);
         endDate = (Button) findViewById(R.id.endDate);
         endTime = (Button) findViewById(R.id.endTime);
+
+        titleEditText = (EditText) findViewById(R.id.titleEditText);
+        contentEditText = (EditText) findViewById(R.id.contentEditText);
     }
 
     @Override
@@ -81,7 +93,30 @@ public class BoardAssignmentActivity extends AppCompatActivity implements TimePi
             @Override
             public void onClick(View v) {
                 //if user typing any words.. then handling it!
-                onBackPressed();
+                if (isAnyInputExist()) {
+                    //question that are you really want to go out
+                    AlertDialog.Builder builder = new AlertDialog.Builder(BoardAssignmentActivity.this);
+                    builder.setTitle("변경을 취소하시겠어요?");
+                    builder.setMessage("지금 돌아가면 작성 중인 내용이 취소됩니다.");
+                    builder.setPositiveButton("삭제", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            onBackPressed();
+                        }
+                    });
+                    builder.setNegativeButton("유지", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            //do nothing
+                        }
+                    });
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+
+                } else {
+                    //go out directly
+                    onBackPressed();
+                }
             }
         });
     }
@@ -197,5 +232,48 @@ public class BoardAssignmentActivity extends AppCompatActivity implements TimePi
                 break;
         }
         return week;
+    }
+    private boolean isAnyInputExist()
+    {
+        if(titleEditText.getText().toString().equals("")
+                && contentEditText.getText().toString().equals("")){
+            return false;
+        }
+        return true;
+    }
+    private void setOptionMenuSyncChanged()
+    {
+        titleEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                invalidateOptionsMenu();
+            }
+        });
+        contentEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                invalidateOptionsMenu();
+            }
+        });
     }
 }

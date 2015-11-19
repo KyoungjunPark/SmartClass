@@ -11,6 +11,7 @@
     </include>
 
     <EditText
+        android:id="@+id/titleEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="제목"
@@ -135,6 +136,7 @@
         android:background="#AA00eeff"
         />
     <EditText
+        android:id="@+id/contentEditText"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:hint="과제의 내용을 입력해 주세요."

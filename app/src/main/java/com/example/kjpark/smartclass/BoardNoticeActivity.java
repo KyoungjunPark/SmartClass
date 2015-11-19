@@ -81,6 +81,7 @@ public class BoardNoticeActivity extends AppCompatActivity{
             if(isAnyInputExist()){
                 //send to server the name/ info/ date
 
+
             } else{
 
             }

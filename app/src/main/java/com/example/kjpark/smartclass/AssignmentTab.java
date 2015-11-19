@@ -41,11 +41,11 @@ public class AssignmentTab extends Fragment{
         listView = (ListView) view.findViewById(R.id.listView);
         listView.setAdapter(adapter);
 
-        adapter.addAssignment(getResources().getDrawable(R.drawable.ic_action)
+        adapter.addAssignment(getResources().getDrawable(R.drawable.ic_warning)
                 , "과제1"
                 , "2015/11/22 ~ 2015/11/23");
 
-        adapter.addAssignment(getResources().getDrawable(R.drawable.ic_action)
+        adapter.addAssignment(null
                 , "과제2"
                 , "2015/11/22 ~ 2015/11/23");
 
@@ -118,11 +118,10 @@ public class AssignmentTab extends Fragment{
             }
             AssignmentListData mData = mListData.get(position);
 
+
+            holder.mIcon.setVisibility(View.VISIBLE);
             if(mData.mIcon != null){
-                holder.mIcon.setVisibility(View.VISIBLE);
                 holder.mIcon.setImageDrawable(mData.mIcon);
-            } else{
-                holder.mIcon.setVisibility(View.GONE);
             }
 
             holder.mTitle.setText(mData.mTitle);

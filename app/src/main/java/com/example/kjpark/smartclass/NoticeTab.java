@@ -8,17 +8,20 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -45,6 +48,7 @@ public class NoticeTab extends Fragment{
         adapter = new ListViewAdapter(getContext());
         listView = (ListView) view.findViewById(R.id.listView);
         listView.setAdapter(adapter);
+        listView.setOnItemClickListener(ItemClickListener);
 
         adapter.addNotice(getResources().getDrawable(R.drawable.ic_warning)
                 , "공지qwewqwqeqewqe1"
@@ -58,6 +62,12 @@ public class NoticeTab extends Fragment{
 
         return view;
     }
+    AdapterView.OnItemClickListener ItemClickListener = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            Toast.makeText(getContext(), ((NoticeListData)adapter.getItem(position)).mTitle, Toast.LENGTH_LONG).show();
+        }
+    };
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -109,6 +119,7 @@ public class NoticeTab extends Fragment{
             return position;
         }
 
+
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             ViewHolder holder;
@@ -133,13 +144,22 @@ public class NoticeTab extends Fragment{
             holder.mIcon.setVisibility(View.VISIBLE);
             if(mData.mIcon != null){
                 holder.mIcon.setImageDrawable(mData.mIcon);
-            } else{
             }
+
             if(mData.mSign != null){
                 holder.mSignButton.setVisibility(View.VISIBLE);
                 holder.mSignButton.setImageDrawable(mData.mSign);
             } else{
                 holder.mSignButton.setVisibility(View.GONE);
+            }
+            if(holder.mSignButton.getVisibility() == View.VISIBLE){
+                //set the click listener
+                holder.mSignButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Toast.makeText(getContext(), "called", Toast.LENGTH_LONG).show();
+                    }
+                });
             }
 
             holder.mTitle.setText(mData.mTitle);
@@ -154,6 +174,7 @@ public class NoticeTab extends Fragment{
             addInfo.mTitle = mTitle;
             addInfo.mDate = mDate;
             addInfo.mSign = sign;
+
 
             mListData.add(addInfo);
         }
