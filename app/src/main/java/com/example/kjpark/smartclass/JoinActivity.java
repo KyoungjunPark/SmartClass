@@ -4,17 +4,30 @@
 
 package com.example.kjpark.smartclass;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
 
 public class JoinActivity extends AppCompatActivity {
+
+    ImageButton teacherButon;
+    ImageButton studentButton;
+    ImageButton parentButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_join);
+
+        teacherButon = (ImageButton) findViewById(R.id.teacherButton);
+        studentButton = (ImageButton) findViewById(R.id.studentButton);
+        parentButton = (ImageButton) findViewById(R.id.parentButton);
+
 
     }
 
@@ -33,6 +46,19 @@ public class JoinActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
 
         return super.onOptionsItemSelected(item);
+    }
+    public void onTeacherButtonClicked(View v){
+        Intent intent = new Intent(JoinActivity.this, JoinTeacherActivity.class);
+        startActivity(intent);
+    }
+    public void onStudentButtonClicked(View v){
+        Intent intent = new Intent(JoinActivity.this, JoinStudentActivity.class);
+        startActivity(intent);
+    }
+    public void onParentButtonClicked(View v){
+        Intent intent = new Intent(JoinActivity.this, JoinParentActivity.class);
+        startActivity(intent);
+
     }
 
 }

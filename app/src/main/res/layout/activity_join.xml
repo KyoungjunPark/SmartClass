@@ -9,27 +9,33 @@
     >
 
     <ImageButton
+        android:id="@+id/teacherButton"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:src="@drawable/register_teacher"
         android:fitsSystemWindows="true"
         android:contentDescription="Teacher"
         android:layout_weight="1"
-        android:clickable="true" />
+        android:clickable="true"
+        android:onClick="onTeacherButtonClicked"/>
     <ImageButton
+        android:id="@+id/studentButton"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:src="@drawable/register_student"
         android:fitsSystemWindows="true"
         android:contentDescription="Student"
         android:layout_weight="1"
-        android:clickable="true"/>
+        android:clickable="true"
+        android:onClick="onStudentButtonClicked"/>
     <ImageButton
+        android:id="@+id/parentButton"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:src="@drawable/register_parent"
         android:fitsSystemWindows="true"
         android:contentDescription="SchoolParent"
         android:layout_weight="1"
-        android:clickable="true"/>
+        android:clickable="true"
+        android:onClick="onParentButtonClicked"/>
 </LinearLayout>
