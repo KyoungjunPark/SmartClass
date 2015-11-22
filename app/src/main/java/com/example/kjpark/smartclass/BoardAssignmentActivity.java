@@ -12,7 +12,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 import com.wdullaer.materialdatetimepicker.time.RadialPickerLayout;
@@ -54,7 +53,7 @@ public class BoardAssignmentActivity extends AppCompatActivity implements TimePi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_board_assignment);
+        setContentView(R.layout.activity_edit_assignment);
 
         toolbar = (Toolbar) findViewById(R.id.tool_bar);
         setToolbar();

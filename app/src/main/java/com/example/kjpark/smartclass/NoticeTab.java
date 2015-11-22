@@ -132,7 +132,17 @@ public class NoticeTab extends Fragment{
     AdapterView.OnItemClickListener ItemClickListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            Toast.makeText(getContext(), ((NoticeListData)adapter.getItem(position)).mTitle, Toast.LENGTH_LONG).show();
+            LayoutInflater dialogInflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+            View noticeDialogView = dialogInflater.inflate(R.layout.dialog_noticeitem, null);
+
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+            builder.setTitle("공지사항");
+            builder.setView(noticeDialogView);
+
+            AlertDialog dialog = builder.create();
+            dialog.show();
         }
     };
 
