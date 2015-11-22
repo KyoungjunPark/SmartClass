@@ -10,12 +10,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 
 public class JoinActivity extends AppCompatActivity {
 
-    ImageButton teacherButon;
+    ImageButton teacherButton;
     ImageButton studentButton;
     ImageButton parentButton;
 
@@ -24,7 +23,7 @@ public class JoinActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_join);
 
-        teacherButon = (ImageButton) findViewById(R.id.teacherButton);
+        teacherButton = (ImageButton) findViewById(R.id.teacherButton);
         studentButton = (ImageButton) findViewById(R.id.studentButton);
         parentButton = (ImageButton) findViewById(R.id.parentButton);
 

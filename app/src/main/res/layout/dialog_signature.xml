@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <com.github.gcacace.signaturepad.views.SignaturePad
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/signature_pad"
+        android:layout_width="350dp"
+        android:layout_height="200dp"
+        app:penColor="@android:color/black"
+        android:layout_centerInParent="true"
+        />
+    <Button
+        android:id="@+id/clearButton"
+        android:layout_width="170dp"
+        android:layout_height="wrap_content"
+        android:text="clear"
+        android:textSize="13sp"
+        android:layout_below="@+id/signature_pad"
+        android:layout_alignLeft="@+id/signature_pad"
+        android:layout_alignStart="@+id/signature_pad"
+        android:background="#00aaff"
+        android:textColor="#ffffff"
+        android:onClick="onCreateButtonClicked"/>
+    <Button
+        android:id="@+id/sendButton"
+        android:layout_width="170dp"
+        android:layout_height="wrap_content"
+        android:text="send"
+        android:textSize="13sp"
+        android:layout_below="@+id/signature_pad"
+        android:layout_alignRight="@+id/signature_pad"
+        android:layout_alignEnd="@+id/signature_pad"
+        android:background="#00aaff"
+        android:textColor="#ffffff"
+        android:onClick="onCreateButtonClicked"/>
+</RelativeLayout>

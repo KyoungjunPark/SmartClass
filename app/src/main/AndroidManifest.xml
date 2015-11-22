@@ -56,6 +56,18 @@
             android:label="@string/boardAssignment"
             android:theme="@style/AppTheme.NoActionBar" >
         </activity>
+        <activity android:name=".JoinTeacherActivity"
+            android:label="@string/joinTeacher"
+            android:theme="@style/AppTheme.NoActionBar" >
+        </activity>
+        <activity android:name=".JoinStudentActivity"
+            android:label="@string/joinStudent"
+            android:theme="@style/AppTheme.NoActionBar" >
+        </activity>
+        <activity android:name=".JoinParentActivity"
+            android:label="@string/joinParent"
+            android:theme="@style/AppTheme.NoActionBar" >
+        </activity>
     </application>
 
 </manifest>

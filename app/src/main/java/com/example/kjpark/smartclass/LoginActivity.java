@@ -71,6 +71,10 @@ public class LoginActivity extends AppCompatActivity {
 
                 email = emailEditText.getText().toString();
                 password = passwordEditText.getText().toString();
+                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                startActivityForResult(intent, REQUEST_CODE_MAIN);
+                finish();
+                /*
                 ConnectServer.getInstance().setAsncTask(new AsyncTask<String, Void, Boolean>() {
                     private Boolean isLoginPermitted = false;
                     private String requestMessage;
@@ -138,6 +142,7 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 });
                 ConnectServer.getInstance().execute();
+             */
             }
         });
 

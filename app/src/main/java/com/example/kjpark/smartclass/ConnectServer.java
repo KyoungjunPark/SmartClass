@@ -9,6 +9,10 @@ import java.net.HttpURLConnection;
  */
 public class ConnectServer {
     private AsyncTask<String, Void, Boolean> task;
+
+    private enum Type {teacher, student, parent}
+    Type type;
+
     private String token;
 
     private static final ConnectServer instance = new ConnectServer();
@@ -21,6 +25,8 @@ public class ConnectServer {
         this.task = task;
     }
     public void setToken(String token){this.token = token;}
+    public Type getType(){return type;}
+    public void setType(Type type){this.type = type;}
     public void execute(){
         this.task.execute();
     }
