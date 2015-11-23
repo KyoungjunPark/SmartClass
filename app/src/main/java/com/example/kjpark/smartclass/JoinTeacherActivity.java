@@ -1,14 +1,29 @@
 package com.example.kjpark.smartclass;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+
+import com.example.kjpark.smartclass.utils.ConnectServer;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
 
 /**
  * Created by parkk on 2015-11-20.
@@ -30,6 +45,7 @@ public class JoinTeacherActivity extends AppCompatActivity {
     private boolean isManClicked = false;
     private boolean isWomanClicked = false;
 
+    public static final int JOIN_PERMITTED = 200;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,7 +126,89 @@ public class JoinTeacherActivity extends AppCompatActivity {
     }
     public void onCreateButtonClicked(View v)
     {
+        final String email = emailEditText.getText().toString();
+        final String password = passwordEditText.getText().toString();
+        final String name = nameEditText.getText().toString();
+        final String sex_type = (isManClicked ? "1" : "0");
 
+        ConnectServer.getInstance().setAsncTask(new AsyncTask<String, Void, Boolean>() {
+            private String requestMessage;
+
+            @Override
+            protected Boolean doInBackground(String... params) {
+                URL obj = null;
+                try {
+                    obj = new URL("http://165.194.104.22:5000/join_teacher");
+
+                    HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+                    con.setRequestProperty("Accept-Language", "ko-kr,ko;q=0.8,en-us;q=0.5,en;q=0.3");
+                    con.setDoOutput(true);
+
+                    String parameter = URLEncoder.encode("email", "UTF-8") + "=" + URLEncoder.encode(email, "UTF-8");
+                    parameter += "&" + URLEncoder.encode("password", "UTF-8") + "=" + URLEncoder.encode(password, "UTF-8");
+                    parameter += "&" + URLEncoder.encode("name", "UTF-8") + "=" + URLEncoder.encode(name, "UTF-8");
+                    parameter += "&" + URLEncoder.encode("sex_type", "UTF-8") + "=" + URLEncoder.encode(sex_type, "UTF-8");
+
+                    OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
+                    wr.write(parameter);
+                    wr.flush();
+                    BufferedReader rd = null;
+
+                    if (con.getResponseCode() == JOIN_PERMITTED) {
+                        // 회원가입 성공
+                        requestMessage = JOIN_PERMITTED + "";
+                    } else {
+                        // 회원가입 실패
+                        rd = new BufferedReader(new InputStreamReader(con.getErrorStream(), "UTF-8"));
+
+                        requestMessage = rd.readLine();
+                        Log.d("----- server -----", String.valueOf(rd.readLine()));
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Boolean aBoolean) {
+                AlertDialog dialog = createDialogBox(requestMessage);
+                dialog.show();
+            }
+        });
+        ConnectServer.getInstance().execute();
+    }
+
+    private AlertDialog createDialogBox(String msg) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        if (msg == JOIN_PERMITTED + "") {
+            builder.setTitle("회원가입 성공");
+
+            builder.setMessage("환영합니다! \n서비스를 이용하려면 로그인해주세요. \n\n");
+            builder.setPositiveButton("확인", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+
+                    // 플래그 변경했음.
+                    intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+                    startActivity(intent);
+                }
+            });
+        } else {
+            builder.setTitle("회원가입 실패");
+
+            // 에러 메시지 전송
+            builder.setMessage(msg + "\n");
+            builder.setPositiveButton("확인", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                }
+            });
+        }
+
+        AlertDialog dialog = builder.create();
+        return dialog;
     }
 
 }

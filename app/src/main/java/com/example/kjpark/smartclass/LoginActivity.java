@@ -19,6 +19,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.example.kjpark.smartclass.utils.ConnectServer;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -71,10 +73,10 @@ public class LoginActivity extends AppCompatActivity {
 
                 email = emailEditText.getText().toString();
                 password = passwordEditText.getText().toString();
-                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                startActivityForResult(intent, REQUEST_CODE_MAIN);
-                finish();
-                /*
+                //Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                //startActivityForResult(intent, REQUEST_CODE_MAIN);
+                //finish();
+
                 ConnectServer.getInstance().setAsncTask(new AsyncTask<String, Void, Boolean>() {
                     private Boolean isLoginPermitted = false;
                     private String requestMessage;
@@ -102,11 +104,9 @@ public class LoginActivity extends AppCompatActivity {
 
                             if (con.getResponseCode() == LOGIN_PERMITTED) {
                                 // 로그인 성공
-
                                 rd = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
                                 String token = rd.readLine();
                                 ConnectServer.getInstance().setToken(token);
-
 
                                 isLoginPermitted = true;
                                 //userSerialNumber = "RA-SP-BERRY-VERY-GOOD";
@@ -142,7 +142,7 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 });
                 ConnectServer.getInstance().execute();
-             */
+
             }
         });
 
