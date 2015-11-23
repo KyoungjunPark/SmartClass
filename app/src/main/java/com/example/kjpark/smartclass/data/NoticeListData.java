@@ -1,4 +1,4 @@
-package com.example.kjpark.smartclass;
+package com.example.kjpark.smartclass.data;
 
 import android.graphics.drawable.Drawable;
 

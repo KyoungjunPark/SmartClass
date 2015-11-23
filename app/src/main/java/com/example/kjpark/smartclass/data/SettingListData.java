@@ -1,6 +1,4 @@
-package com.example.kjpark.smartclass;
-
-import android.graphics.drawable.Drawable;
+package com.example.kjpark.smartclass.data;
 
 import java.text.Collator;
 import java.util.Comparator;

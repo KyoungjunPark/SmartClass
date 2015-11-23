@@ -1,4 +1,4 @@
-package com.example.kjpark.smartclass;
+package com.example.kjpark.smartclass.utils;
 
 import android.os.AsyncTask;
 
