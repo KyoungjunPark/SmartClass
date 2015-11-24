@@ -22,6 +22,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.kjpark.smartclass.data.NoticeListData;
+import com.example.kjpark.smartclass.utils.ConnectServer;
 import com.github.gcacace.signaturepad.views.SignaturePad;
 
 import java.util.ArrayList;
@@ -130,14 +131,22 @@ public class NoticeTab extends Fragment{
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             LayoutInflater dialogInflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-            View noticeDialogView = dialogInflater.inflate(R.layout.dialog_noticeitem, null);
+            final View noticeDialogView = dialogInflater.inflate(R.layout.dialog_noticeitem, null);
 
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+            final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
             builder.setTitle("공지사항");
             builder.setView(noticeDialogView);
 
-            AlertDialog dialog = builder.create();
+            Button checkButton = (Button) noticeDialogView.findViewById(R.id.checkButton);
+
+            final AlertDialog dialog = builder.create();
+            checkButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    dialog.dismiss();
+                }
+            });
             dialog.show();
         }
     };
@@ -145,6 +154,9 @@ public class NoticeTab extends Fragment{
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.menu_write, menu);
+        if(ConnectServer.getInstance().getType() != ConnectServer.Type.teacher) {
+            menu.removeItem(R.id.action_write);
+        }
         super.onCreateOptionsMenu(menu, inflater);
     }
 

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal">
+    <include
+        android:id="@+id/tool_bar"
+        layout="@layout/toolbar_main"
+        >
+    </include>
+
+    <TextView
+        android:id="@+id/studentInfoTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textSize="30sp"
+        android:text="학생 코드"
+        android:textColor="#8b8989"
+        android:layout_marginLeft="30dp"
+        android:layout_marginStart="30dp"
+        android:layout_centerVertical="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+    <TextView
+        android:id="@+id/studentCodeTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textSize="35sp"
+        android:text="S1111111"
+        android:background="#ffebcd"
+        android:layout_alignTop="@+id/studentInfoTextView"
+        android:layout_toRightOf="@+id/studentInfoTextView"
+        android:layout_toEndOf="@+id/studentInfoTextView"
+        android:layout_marginLeft="50dp"
+        android:layout_marginStart="50dp" />
+    <TextView
+        android:id="@+id/parentInfoTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textSize="30sp"
+        android:text="학부모 코드"
+        android:textColor="#8b8989"
+        android:layout_marginTop="30dp"
+        android:layout_below="@+id/studentInfoTextView"
+        android:layout_alignLeft="@+id/studentInfoTextView"
+        android:layout_alignStart="@+id/studentInfoTextView" />
+    <TextView
+        android:id="@+id/parentCodeTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textSize="35sp"
+        android:text="P1111111"
+        android:background="#ffebcd"
+        android:layout_alignTop="@+id/parentInfoTextView"
+        android:layout_alignLeft="@+id/studentCodeTextView"
+        android:layout_alignStart="@+id/studentCodeTextView" />
+</RelativeLayout>

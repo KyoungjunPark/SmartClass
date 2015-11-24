@@ -1,41 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-android:layout_width="match_parent"
-android:layout_height="match_parent"
-android:padding="15dp" >
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="15dp" >
 
-<TextView
-    android:id="@+id/mText"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:textSize="18sp"
-    android:text="제목"
-    android:textAppearance="?android:attr/textAppearanceLarge"
-    />
+    <TextView
+        android:id="@+id/mText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:text="제목"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        />
 
-<TextView
-    android:id="@+id/mInfo"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="내용"
-    android:textSize="18sp"
-    android:textAppearance="?android:attr/textAppearanceLarge"
-    android:textColor="#8b8989"
-    android:layout_toStartOf="@+id/signImageButton"
-    android:layout_toLeftOf="@+id/signImageButton"
-    android:layout_marginEnd="15dp"
-    android:layout_marginRight="15dp"
-    android:gravity="center_horizontal"
-    />
-<ImageButton
-    android:id="@+id/signImageButton"
-    android:layout_width="15dp"
-    android:layout_height="15dp"
-    android:padding="20dp"
-    android:src="@drawable/ic_rightarrow"
-    android:background="@android:color/transparent"
-    android:contentDescription="right arrow"
-    android:layout_alignParentRight="true"
-    android:layout_alignParentEnd="true"
-    android:foregroundGravity="center" />
+    <TextView
+        android:id="@+id/mInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="내용"
+        android:textSize="18sp"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="#8b8989"
+        android:layout_toStartOf="@+id/arrowImageView"
+        android:layout_toLeftOf="@+id/arrowImageView"
+        android:layout_marginEnd="15dp"
+        android:layout_marginRight="15dp"
+        android:gravity="center_horizontal"
+        />
+    <ImageView
+        android:id="@+id/arrowImageView"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:src="@drawable/ic_rightarrow"
+        android:contentDescription="right arrow"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:foregroundGravity="center" />
+    <ToggleButton
+        android:id="@+id/toggleButton"
+        android:layout_width="100dp"
+        android:layout_height="30dp"
+        android:background="@drawable/bgtoggle"
+        android:button="@null"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:textOff=""
+        android:textOn=""/>
+
 </RelativeLayout>

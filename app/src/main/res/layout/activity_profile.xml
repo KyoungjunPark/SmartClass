@@ -40,8 +40,6 @@
     </RelativeLayout>
     <View
         android:layout_width="match_parent"
-        android:layout_marginTop="30dp"
-        android:layout_marginBottom="15dp"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:layout_height="1dp"
@@ -55,50 +53,32 @@
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="0.3"
-            android:gravity="left"
-            android:layout_marginStart="15dp"
-            android:layout_marginLeft="15dp"
-            android:text="Name"
-            android:textSize="25sp"
-            android:textStyle="bold"/>
-        <TextView
-            android:id="@+id/nameTextView"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.7"
-            android:layout_marginEnd="15dp"
-            android:layout_marginRight="15dp"
-            android:gravity="right"
-            android:text="PARK KYOUNG JUN"
-            android:textSize="16sp"/>
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="15dp"
-        android:orientation="horizontal">
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.3"
+            android:layout_weight="0.5"
             android:gravity="left"
             android:layout_marginStart="15dp"
             android:layout_marginLeft="15dp"
             android:text="Email"
-            android:textSize="25sp"
-            android:textStyle="bold"/>
+            android:textSize="20sp"/>
         <TextView
             android:id="@+id/emailTextView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="0.7"
+            android:layout_weight="0.5"
             android:layout_marginEnd="15dp"
             android:layout_marginRight="15dp"
             android:gravity="right"
             android:text="PARK KYOUNG JUN"
-            android:textSize="16sp"/>
+            android:textColor="#000000"
+            android:textSize="20sp"
+            android:textStyle="bold"/>
     </LinearLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_height="1dp"
+        android:background="#AA00eeff"
+        />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -107,23 +87,32 @@
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="0.3"
+            android:layout_weight="0.5"
             android:gravity="left"
             android:layout_marginStart="15dp"
             android:layout_marginLeft="15dp"
-            android:text="NAME"
-            android:textSize="25sp"
-            android:textStyle="bold"/>
+            android:text="Name"
+            android:textSize="20sp"/>
         <TextView
+            android:id="@+id/nameTextView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="0.7"
+            android:layout_weight="0.5"
             android:layout_marginEnd="15dp"
             android:layout_marginRight="15dp"
             android:gravity="right"
             android:text="PARK KYOUNG JUN"
-            android:textSize="16sp"/>
+            android:textColor="#000000"
+            android:textSize="20sp"
+            android:textStyle="bold"/>
     </LinearLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_height="1dp"
+        android:background="#AA00eeff"
+        />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -132,21 +121,57 @@
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="0.3"
+            android:layout_weight="0.5"
             android:gravity="left"
             android:layout_marginStart="15dp"
             android:layout_marginLeft="15dp"
-            android:text="NAME"
-            android:textSize="25sp"
-            android:textStyle="bold"/>
+            android:text="Registration Type"
+            android:textSize="20sp"/>
         <TextView
+            android:id="@+id/registrationTextView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="0.7"
+            android:layout_weight="0.5"
             android:layout_marginEnd="15dp"
             android:layout_marginRight="15dp"
             android:gravity="right"
             android:text="PARK KYOUNG JUN"
-            android:textSize="16sp"/>
+            android:textColor="#000000"
+            android:textSize="20sp"
+            android:textStyle="bold"/>
+    </LinearLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_height="1dp"
+        android:background="#AA00eeff"
+        />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="15dp"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:gravity="left"
+            android:layout_marginStart="15dp"
+            android:layout_marginLeft="15dp"
+            android:text="Sex Type"
+            android:textSize="20sp"/>
+        <TextView
+            android:id="@+id/sexTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:layout_marginEnd="15dp"
+            android:layout_marginRight="15dp"
+            android:gravity="right"
+            android:text="PARK KYOUNG JUN"
+            android:textColor="#000000"
+            android:textSize="20sp"
+            android:textStyle="bold"/>
     </LinearLayout>
 </LinearLayout>

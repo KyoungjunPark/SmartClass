@@ -1,5 +1,6 @@
 package com.example.kjpark.smartclass;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -12,12 +13,15 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.kjpark.smartclass.data.AssignmentListData;
+import com.example.kjpark.smartclass.utils.ConnectServer;
 
 import java.util.ArrayList;
 
@@ -42,6 +46,7 @@ public class AssignmentTab extends Fragment{
         adapter = new ListViewAdapter(getContext());
         listView = (ListView) view.findViewById(R.id.listView);
         listView.setAdapter(adapter);
+        listView.setOnItemClickListener(ItemClickListener);
 
         adapter.addAssignment(getResources().getDrawable(R.drawable.ic_warning)
                 , "과제1"
@@ -53,9 +58,38 @@ public class AssignmentTab extends Fragment{
 
         return view;
     }
+    AdapterView.OnItemClickListener ItemClickListener = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            LayoutInflater dialogInflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+            View noticeDialogView = dialogInflater.inflate(R.layout.dialog_assignmentitem, null);
+
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+            builder.setTitle("과제방");
+            builder.setView(noticeDialogView);
+
+            Button checkButton = (Button) noticeDialogView.findViewById(R.id.checkButton);
+
+            final AlertDialog dialog = builder.create();
+            checkButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    dialog.dismiss();
+                }
+            });
+            dialog.show();
+        }
+    };
+
+
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.menu_write, menu);
+        if(ConnectServer.getInstance().getType() != ConnectServer.Type.teacher) {
+            menu.removeItem(R.id.action_write);
+        }
         super.onCreateOptionsMenu(menu, inflater);
     }
     @Override

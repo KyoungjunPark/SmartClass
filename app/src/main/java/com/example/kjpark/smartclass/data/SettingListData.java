@@ -10,6 +10,7 @@ public class SettingListData {
 
     public String mTitle;
     public String mInfo;
+    public Boolean mIsConcentrationMode;
 
     //alphabetical order
     public static final Comparator<SettingListData> ALPHA_COMPARATOR = new Comparator<SettingListData>() {

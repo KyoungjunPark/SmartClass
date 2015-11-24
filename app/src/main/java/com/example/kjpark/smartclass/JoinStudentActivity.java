@@ -3,10 +3,13 @@ package com.example.kjpark.smartclass;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -65,6 +68,15 @@ public class JoinStudentActivity extends AppCompatActivity {
         manImageButton = (ImageButton) findViewById(R.id.manImageButton);
         womanImageButton = (ImageButton) findViewById(R.id.womanImageButton);
         createButton = (Button) findViewById(R.id.createButton);
+
+        createButton.setEnabled(false);
+        createButton.setBackgroundColor(Color.GRAY);
+
+        nameEditText.addTextChangedListener(filledWatcher);
+        emailEditText.addTextChangedListener(filledWatcher);
+        passwordEditText.addTextChangedListener(filledWatcher);
+        codeEditText.addTextChangedListener(filledWatcher);
+
     }
 
     @Override
@@ -216,4 +228,30 @@ public class JoinStudentActivity extends AppCompatActivity {
         AlertDialog dialog = builder.create();
         return dialog;
     }
+    TextWatcher filledWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            if(nameEditText.getText().toString().equals("")
+                    || passwordEditText.getText().toString().equals("")
+                    || emailEditText.getText().toString().equals("")
+                    || codeEditText.getText().toString().equals("")
+                    || (!isManClicked && !isWomanClicked)){
+                createButton.setEnabled(false);
+                createButton.setBackgroundColor(Color.GRAY);
+            } else{
+                createButton.setEnabled(true);
+                createButton.setBackgroundColor(Color.parseColor("#00aaff"));
+            }
+        }
+    };
 }

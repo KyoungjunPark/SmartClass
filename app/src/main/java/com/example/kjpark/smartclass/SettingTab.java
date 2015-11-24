@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -13,12 +14,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
-import com.example.kjpark.smartclass.data.NoticeListData;
 import com.example.kjpark.smartclass.data.SettingListData;
+import com.example.kjpark.smartclass.utils.ConnectServer;
 
 import java.util.ArrayList;
 
@@ -48,17 +51,35 @@ public class SettingTab extends Fragment{
         listView.setOnItemClickListener(ItemClickListener);
 
         adapter.addNotice("버전정보"
-                , "1.0.0");
-
-        adapter.addNotice("집중모드"
-                , "OFF");
-
+                , "1.0.0", null);
+        adapter.addNotice("코드정보"
+                , null, null);
+        if(ConnectServer.getInstance().getType() == ConnectServer.Type.teacher) {
+            adapter.addNotice("집중모드"
+                    ,null ,true);
+        }
         return view;
     }
     AdapterView.OnItemClickListener ItemClickListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            Toast.makeText(getContext(), ((NoticeListData) adapter.getItem(position)).mTitle, Toast.LENGTH_LONG).show();
+            ViewHolder holder = (ViewHolder) view.getTag();
+            if(holder.mTitle.getText().toString().equals("버전정보")){
+                Intent intent = new Intent(getActivity(), VersionInfoActivity.class);
+                startActivity(intent);
+            } else if (holder.mTitle.getText().toString().equals("코드정보")) {
+                if(ConnectServer.getInstance().getType() == ConnectServer.Type.teacher) {
+                    Intent intent = new Intent(getActivity(), CodeInfoTeacherActivity.class);
+                    startActivity(intent);
+                } else{
+                    Intent intent = new Intent(getActivity(), CodeInfoActivity.class);
+                    startActivity(intent);
+                }
+            } else if (holder.mTitle.getText().toString().equals("집중모드")){
+                ToggleButton toggleButton = (ToggleButton) view.findViewById(R.id.toggleButton);
+                toggleButton.setSelected(!holder.mToggleButton.isSelected());
+                holder.mToggleButton.setSelected(!holder.mToggleButton.isSelected());
+            }
         }
     };
 
@@ -85,6 +106,7 @@ public class SettingTab extends Fragment{
     {
         public TextView mTitle;
         public TextView mInfo;
+        public ToggleButton mToggleButton;
     }
     private class ListViewAdapter extends BaseAdapter {
 
@@ -123,6 +145,7 @@ public class SettingTab extends Fragment{
 
                 holder.mTitle = (TextView) convertView.findViewById(R.id.mText);
                 holder.mInfo = (TextView) convertView.findViewById(R.id.mInfo);
+                holder.mToggleButton = (ToggleButton) convertView.findViewById(R.id.toggleButton);
 
                 convertView.setTag(holder);
             } else{
@@ -131,17 +154,34 @@ public class SettingTab extends Fragment{
             SettingListData mData = mListData.get(position);
 
             holder.mTitle.setText(mData.mTitle);
-            holder.mInfo.setText(mData.mInfo);
+
+            if(mData.mInfo != null) holder.mInfo.setText(mData.mInfo);
+            //else holder.mInfo.setVisibility(View.GONE);
+
+            if(mData.mIsConcentrationMode != null) {
+                holder.mToggleButton.setSelected(mData.mIsConcentrationMode);
+                holder.mToggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        if(isChecked){
+                            //send server to change state
+
+                        } else {
+
+                        }
+                    }
+                });
+            }
+            else holder.mToggleButton.setVisibility(View.GONE);
 
             return convertView;
         }
-        public void addNotice(String mTitle, String mInfo)
+        public void addNotice(String mTitle, String mInfo, Boolean isConcentrationMode)
         {
             SettingListData addInfo = new SettingListData();
             addInfo.mTitle = mTitle;
             addInfo.mInfo = mInfo;
-
-
+            addInfo.mIsConcentrationMode = isConcentrationMode;
             mListData.add(addInfo);
         }
         public void removeNotice(int position)

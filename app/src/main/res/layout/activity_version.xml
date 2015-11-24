@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal">
+    <include
+        android:id="@+id/tool_bar"
+        layout="@layout/toolbar_main"
+        >
+    </include>
+    <ImageView
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:src="@drawable/logo"
+        android:contentDescription="logo"
+        android:id="@+id/imageView"
+        android:foregroundGravity="center"
+        android:layout_below="@+id/tool_bar"
+        android:layout_marginLeft="50dp"
+        android:layout_marginTop="52dp" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="현재 버전 v1.0.0"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textSize="14sp"
+        android:id="@+id/textView5"
+
+        android:layout_toEndOf="@+id/imageView"
+        android:layout_toRightOf="@+id/imageView"
+        android:layout_alignTop="@+id/imageView"
+        android:layout_marginTop="70dp"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="최신 버전 v1.0.0"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textSize="14sp"
+        android:id="@+id/textView4"
+        android:layout_toEndOf="@+id/imageView"
+        android:layout_toRightOf="@+id/imageView"
+        android:layout_alignBottom="@+id/imageView"
+        android:layout_marginBottom="70dp"/>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:paddingStart="30dp"
+        android:paddingLeft="30dp"
+        android:paddingEnd="30dp"
+        android:paddingRight="30dp"
+        android:text="현재 최신 버전입니다."
+        android:textSize="16sp"
+        android:layout_below="@+id/imageView"
+        android:background="#eee9e9"
+        android:layout_centerInParent="true"/>
+</RelativeLayout>

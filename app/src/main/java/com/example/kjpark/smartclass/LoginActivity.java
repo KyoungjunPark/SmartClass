@@ -31,6 +31,8 @@ import java.net.URLEncoder;
 
 public class LoginActivity extends AppCompatActivity {
 
+    private final String TAG = "LoginActivity";
+
     TextView emailTextView;
     TextView passwordTextView;
     TextView newAccountButton;
@@ -73,9 +75,6 @@ public class LoginActivity extends AppCompatActivity {
 
                 email = emailEditText.getText().toString();
                 password = passwordEditText.getText().toString();
-                //Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                //startActivityForResult(intent, REQUEST_CODE_MAIN);
-                //finish();
 
                 ConnectServer.getInstance().setAsncTask(new AsyncTask<String, Void, Boolean>() {
                     private Boolean isLoginPermitted = false;
@@ -107,8 +106,31 @@ public class LoginActivity extends AppCompatActivity {
                                 rd = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
                                 String token = rd.readLine();
                                 ConnectServer.getInstance().setToken(token);
-
                                 isLoginPermitted = true;
+
+                                //get the user type
+                                obj = new URL("http://165.194.104.22:5000/login_type");
+                                con = (HttpURLConnection) obj.openConnection();
+
+                                //implement below code if token is send to server
+                                con = ConnectServer.getInstance().setHeader(con);
+                                con.setDoOutput(true);
+
+                                parameter = URLEncoder.encode("email", "UTF-8") + "=" + URLEncoder.encode(email, "UTF-8");
+                                parameter += "&" + URLEncoder.encode("password", "UTF-8") + "=" + URLEncoder.encode(password, "UTF-8");
+
+                                wr = new OutputStreamWriter(con.getOutputStream());
+                                wr.write(parameter);
+                                wr.flush();
+
+                                rd = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
+                                String type = rd.readLine();
+
+                                if(type.equals("parent")) ConnectServer.getInstance().setTypeParent();
+                                else if(type.equals("teacher")) ConnectServer.getInstance().setTypetoTeacher();
+                                else if(type.equals("student")) ConnectServer.getInstance().setTypetoStudent();
+                                else Log.e(TAG,"wrong type returned");
+
                                 //userSerialNumber = "RA-SP-BERRY-VERY-GOOD";
                                 Log.d("---- success ----", token);
 
@@ -166,77 +188,6 @@ public class LoginActivity extends AppCompatActivity {
     public void onNewAccountButtonClicked(View v){
         Intent intent = new Intent(LoginActivity.this, JoinActivity.class);
         startActivity(intent);
-    }
-    public void onLoginButtonClicked(View v){
-        /*
-        ConnectServer.getInstance().setAsncTask(new AsyncTask<String, Void, Boolean>() {
-            private Boolean isLoginPermitted;
-            private String requestMessage;
-
-            @Override
-            protected Boolean doInBackground(String... params) {
-                URL obj = null;
-                try {
-                    obj = new URL("http://165.194.104.22:5000/login");
-                    HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-
-                    //implement below code if token is send to server
-                    con = ConnectServer.getInstance().setHeader(con);
-
-                    con.setDoOutput(true);
-
-                    String parameter = URLEncoder.encode("email", "UTF-8") + "=" + URLEncoder.encode(email, "UTF-8");
-                    parameter += "&" + URLEncoder.encode("password", "UTF-8") + "=" + URLEncoder.encode(password, "UTF-8");
-
-                    OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
-                    wr.write(parameter);
-                    wr.flush();
-
-                    BufferedReader rd = null;
-
-                    if (con.getResponseCode() == LOGIN_PERMITTED) {
-                        // 로그인 성공
-
-                        rd = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
-                        String token = rd.readLine();
-                        ConnectServer.getInstance().setToken(token);
-
-
-                        isLoginPermitted = true;
-                        //userSerialNumber = "RA-SP-BERRY-VERY-GOOD";
-                        Log.d("---- success ----", token);
-
-
-                    } else {
-                        // 로그인 실패
-                        rd = new BufferedReader(new InputStreamReader(con.getErrorStream(), "UTF-8"));
-                        isLoginPermitted = false;
-                        requestMessage = rd.readLine();
-                        Log.d("---- failed ----", String.valueOf(rd.readLine()));
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Boolean aBoolean) {
-                if (isLoginPermitted) {
-                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                    startActivityForResult(intent, REQUEST_CODE_MAIN);
-                    finish();
-                } else {
-                    AlertDialog dialog = createDialogBox(requestMessage);
-                    dialog.show();
-                    emailTextView.setText("");
-                    passwordTextView.setText("");
-                }
-
-            }
-        });
-        ConnectServer.getInstance().execute();
-*/
     }
     private AlertDialog createDialogBox(String msg) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);

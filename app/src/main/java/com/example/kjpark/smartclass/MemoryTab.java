@@ -21,6 +21,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.example.kjpark.smartclass.adapter.FeedListAdapter;
 import com.example.kjpark.smartclass.app.AppController;
 import com.example.kjpark.smartclass.data.FeedItem;
+import com.example.kjpark.smartclass.utils.ConnectServer;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -128,6 +129,9 @@ public class MemoryTab extends Fragment{
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.menu_enroll, menu);
+        if(ConnectServer.getInstance().getType() != ConnectServer.Type.teacher) {
+            menu.removeItem(R.id.action_enroll);
+        }
         super.onCreateOptionsMenu(menu, inflater);
     }
 

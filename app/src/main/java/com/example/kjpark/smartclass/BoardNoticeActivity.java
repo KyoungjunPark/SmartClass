@@ -2,15 +2,29 @@ package com.example.kjpark.smartclass;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.CheckedTextView;
 import android.widget.EditText;
+
+import com.example.kjpark.smartclass.utils.ConnectServer;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
 
 /**
  * Created by parkk on 2015-11-17.
@@ -38,6 +52,7 @@ public class BoardNoticeActivity extends AppCompatActivity{
 
     private EditText titleEditText;
     private EditText contentEditText;
+    private CheckedTextView checkTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +64,7 @@ public class BoardNoticeActivity extends AppCompatActivity{
 
         titleEditText = (EditText) findViewById(R.id.titleEditText);
         contentEditText = (EditText) findViewById(R.id.contentEditText);
+        checkTextView = (CheckedTextView) findViewById(R.id.checkTextView);
 
         setOptionMenuSyncChanged();
     }
@@ -80,14 +96,79 @@ public class BoardNoticeActivity extends AppCompatActivity{
         if(id == R.id.action_enroll){
             if(isAnyInputExist()){
                 //send to server the name/ info/ date
+                ConnectServer.getInstance().setAsncTask(new AsyncTask<String, Void, Boolean>() {
+                    private String requestMessage;
+                    private int requestCode;
+                    private String title = titleEditText.getText().toString();
+                    private String content = contentEditText.getText().toString();
+                    private String isSignNeed = Boolean.toString(checkTextView.isChecked());
+                    @Override
+                    protected Boolean doInBackground(String... params) {
+                        URL obj = null;
+                        try {
+                            obj = new URL("http://165.194.104.22:5000/enroll_notice");
 
+                            HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+                            con.setRequestProperty("Accept-Language", "ko-kr,ko;q=0.8,en-us;q=0.5,en;q=0.3");
+                            con.setDoOutput(true);
 
-            } else{
+                            String parameter = URLEncoder.encode("title", "UTF-8") + "=" + URLEncoder.encode(title, "UTF-8");
+                            parameter += "&" + URLEncoder.encode("content", "UTF-8") + "=" + URLEncoder.encode(content, "UTF-8");
+                            parameter += "&" + URLEncoder.encode("isSignNeed", "UTF-8") + "=" + URLEncoder.encode(isSignNeed, "UTF-8");
+
+                            OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
+                            wr.write(parameter);
+                            wr.flush();
+                            BufferedReader rd = null;
+                            requestCode = con.getResponseCode();
+
+                            if (requestCode == 200) {
+                                //enroll success
+
+                            } else {
+                                // enroll fail
+                                rd = new BufferedReader(new InputStreamReader(con.getErrorStream(), "UTF-8"));
+
+                                requestMessage = rd.readLine();
+                                Log.d("----- server -----", String.valueOf(rd.readLine()));
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    protected void onPostExecute(Boolean aBoolean) {
+                        if (requestCode == 200) {
+                            finish();
+                        } else {
+                            AlertDialog dialog = createDialogBox(requestMessage);
+                            dialog.show();
+                        }
+                    }
+                });
+                ConnectServer.getInstance().execute();
 
             }
         }
 
         return true;
+    }
+    private AlertDialog createDialogBox(String msg) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        builder.setTitle("올리기 실패");
+
+        builder.setMessage("서버와의 통신이 좋지 않습니다.\n다시 시도 해주세요." + msg + "\n");
+        builder.setPositiveButton("확인", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+            }
+        });
+
+        AlertDialog dialog = builder.create();
+        return dialog;
+
     }
 
     private void setToolbar()

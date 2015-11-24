@@ -69,6 +69,18 @@
             android:label="@string/joinParent"
             android:theme="@style/AppTheme.NoActionBar" >
         </activity>
+        <activity android:name=".VersionInfoActivity"
+            android:label="@string/version"
+            android:theme="@style/AppTheme.NoActionBar" >
+        </activity>
+        <activity android:name=".CodeInfoActivity"
+            android:label="@string/codeInfo"
+            android:theme="@style/AppTheme.NoActionBar" >
+        </activity>
+        <activity android:name=".CodeInfoTeacherActivity"
+            android:label="@string/codeInfo"
+            android:theme="@style/AppTheme.NoActionBar" >
+        </activity>
     </application>
 
 </manifest>

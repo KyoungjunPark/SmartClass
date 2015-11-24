@@ -18,6 +18,7 @@ import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -32,17 +33,28 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.example.kjpark.smartclass.utils.ConnectServer;
+
 import org.w3c.dom.Text;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 public class ProfileActivity extends AppCompatActivity {
 
     private final static String TAG = "ProfileActivity";
     private Toolbar toolbar;
     private de.hdodenhof.circleimageview.CircleImageView profileImageView;
-    private TextView nameTextView;
+
     private TextView emailTextView;
+    private TextView nameTextView;
+    private TextView registrationTextView;
+    private TextView sexTextView;
 
     private RelativeLayout profileImageLayout;
 
@@ -51,6 +63,30 @@ public class ProfileActivity extends AppCompatActivity {
     private static final int CROP_FROM_CAMERA = 1002;
 
     private Uri mImageCaptureUri;
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_profile);
+
+        toolbar = (Toolbar) findViewById(R.id.tool_bar);
+        toolbar.setTitle(R.string.profile);
+        setToolbar();
+
+        profileImageView = (de.hdodenhof.circleimageview.CircleImageView) findViewById(R.id.profileImageView);
+        nameTextView = (TextView) findViewById(R.id.nameTextView);
+        emailTextView = (TextView) findViewById(R.id.emailTextView);
+        profileImageLayout = (RelativeLayout) findViewById(R.id.profileImageLayout);
+        registrationTextView = (TextView) findViewById(R.id.registrationTextView);
+        sexTextView = (TextView) findViewById(R.id.sexTextView);
+
+        resizeImage();
+
+        setBackgroundImage();
+
+        setData();
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -98,25 +134,6 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_profile);
-
-        toolbar = (Toolbar) findViewById(R.id.tool_bar);
-        toolbar.setTitle(R.string.profile);
-        setToolbar();
-
-        profileImageView = (de.hdodenhof.circleimageview.CircleImageView) findViewById(R.id.profileImageView);
-        nameTextView = (TextView) findViewById(R.id.nameTextView);
-        emailTextView = (TextView) findViewById(R.id.emailTextView);
-        profileImageLayout = (RelativeLayout) findViewById(R.id.profileImageLayout);
-
-        resizeImage();
-
-        setBackgroundImage();
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_user, menu);
@@ -124,7 +141,6 @@ public class ProfileActivity extends AppCompatActivity {
         menu.removeItem(R.id.action_write);
         return true;
     }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -134,7 +150,6 @@ public class ProfileActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
-
     private void setToolbar(){
         toolbar = (Toolbar) findViewById(R.id.tool_bar);
         setSupportActionBar(toolbar);
@@ -153,7 +168,6 @@ public class ProfileActivity extends AppCompatActivity {
     {
         Bitmap bmp = decodeSampledBitmapFromResource(getResources(), R.drawable.profile, 500, 500);
         profileImageView.setImageBitmap(bmp);
-
     }
     private void setBackgroundImage()
     {
@@ -165,8 +179,6 @@ public class ProfileActivity extends AppCompatActivity {
         BitmapDrawable bmpDrawable = new BitmapDrawable(getResources(), bmp);
 
         profileImageLayout.setBackground(bmpDrawable);
-
-
     }
     public static Bitmap decodeSampledBitmapFromResource(Resources res, int resId,
                                                          int reqWidth, int reqHeight) {
@@ -255,6 +267,64 @@ public class ProfileActivity extends AppCompatActivity {
 
         intent.putExtra(MediaStore.EXTRA_OUTPUT, mImageCaptureUri);
         startActivityForResult(intent, PICK_FROM_CAMERA);
+    }
+    private void setData()
+    {
+        ConnectServer.getInstance().setAsncTask(new AsyncTask<String, Void, Boolean>() {
+            private String email;
+            private String name;
+            private String reg_type;
+            private String sex_type;
+
+            @Override
+            protected Boolean doInBackground(String... params) {
+                URL obj = null;
+                try {
+                    obj = new URL("http://165.194.104.22:5000/get_profile");
+                    HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+                    //implement below code if token is send to server
+                    con = ConnectServer.getInstance().setHeader(con);
+
+                    con.setDoOutput(true);
+
+                    OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
+                    wr.flush();
+
+                    BufferedReader rd = null;
+
+                    if (con.getResponseCode() == 200) {
+                        rd = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
+                        String tmpString = rd.readLine();
+                        String[] codes = tmpString.split("/");
+
+                        email = codes[0];
+                        name = codes[1];
+                        reg_type = codes[2];
+                        sex_type = codes[3];
+
+                        Log.d("---- success ----", tmpString);
+                    } else {
+                        rd = new BufferedReader(new InputStreamReader(con.getErrorStream(), "UTF-8"));
+                        Log.d("---- failed ----", String.valueOf(rd.readLine()));
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Boolean aBoolean) {
+                emailTextView.setText(email);
+                nameTextView.setText(name);
+                registrationTextView.setText(reg_type);
+                sexTextView.setText(sex_type);
+            }
+
+        });
+        ConnectServer.getInstance().execute();
+
     }
 
 }

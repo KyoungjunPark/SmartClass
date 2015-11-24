@@ -12,4 +12,8 @@
     <string name="joinTeacher">교사 계정 생성</string>
     <string name="joinStudent">학생 계정 생성</string>
     <string name="joinParent">부모 계정 생성</string>
+
+    <string name="version">버전정보</string>
+    <string name="codeInfo">코드정보</string>
+    <string name="concentrationInfo">집중모드</string>
 </resources>

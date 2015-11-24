@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal">
+    <include
+        android:id="@+id/tool_bar"
+        layout="@layout/toolbar_main"
+        >
+    </include>
+
+    <TextView
+        android:id="@+id/infoTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textSize="35sp"
+        android:text="나의 코드"
+        android:textColor="#8b8989"
+        android:layout_marginLeft="30dp"
+        android:layout_marginStart="30dp"
+        android:layout_centerVertical="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+    <TextView
+        android:id="@+id/codeTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textSize="35sp"
+        android:text="P1111111"
+        android:background="#ffebcd"
+        android:layout_alignTop="@+id/infoTextView"
+        android:layout_toRightOf="@+id/infoTextView"
+        android:layout_toEndOf="@+id/infoTextView"
+        android:layout_marginLeft="30dp"
+        android:layout_marginStart="30dp" />
+</RelativeLayout>
