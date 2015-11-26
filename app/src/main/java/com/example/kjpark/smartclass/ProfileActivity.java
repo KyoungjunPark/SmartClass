@@ -302,7 +302,6 @@ public class ProfileActivity extends AppCompatActivity {
                         name = codes[1];
                         reg_type = codes[2];
                         sex_type = codes[3];
-
                         Log.d("---- success ----", tmpString);
                     } else {
                         rd = new BufferedReader(new InputStreamReader(con.getErrorStream(), "UTF-8"));

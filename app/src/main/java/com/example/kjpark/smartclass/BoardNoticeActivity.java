@@ -15,8 +15,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.CheckedTextView;
 import android.widget.EditText;
+import android.widget.Toast;
 
+import com.example.kjpark.smartclass.data.NoticeListData;
 import com.example.kjpark.smartclass.utils.ConnectServer;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -25,6 +31,8 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by parkk on 2015-11-17.
@@ -53,6 +61,10 @@ public class BoardNoticeActivity extends AppCompatActivity{
     private EditText titleEditText;
     private EditText contentEditText;
     private CheckedTextView checkTextView;
+    private CheckedTextView importanceTextView;
+
+    private Boolean isChecked = false;
+    private Boolean isImportanceCheked = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +77,21 @@ public class BoardNoticeActivity extends AppCompatActivity{
         titleEditText = (EditText) findViewById(R.id.titleEditText);
         contentEditText = (EditText) findViewById(R.id.contentEditText);
         checkTextView = (CheckedTextView) findViewById(R.id.checkTextView);
-
+        checkTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isChecked = !isChecked;
+                checkTextView.setChecked(isChecked);
+            }
+        });
+        importanceTextView = (CheckedTextView) findViewById(R.id.importanceTextView);
+        importanceTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isImportanceCheked = !isImportanceCheked;
+                importanceTextView.setChecked(isImportanceCheked);
+            }
+        });
         setOptionMenuSyncChanged();
     }
 
@@ -101,7 +127,9 @@ public class BoardNoticeActivity extends AppCompatActivity{
                     private int requestCode;
                     private String title = titleEditText.getText().toString();
                     private String content = contentEditText.getText().toString();
-                    private String isSignNeed = Boolean.toString(checkTextView.isChecked());
+                    private String isSignNeed = isChecked.toString();
+                    private String isImportant = isImportanceCheked.toString();
+
                     @Override
                     protected Boolean doInBackground(String... params) {
                         URL obj = null;
@@ -109,19 +137,23 @@ public class BoardNoticeActivity extends AppCompatActivity{
                             obj = new URL("http://165.194.104.22:5000/enroll_notice");
 
                             HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-                            con.setRequestProperty("Accept-Language", "ko-kr,ko;q=0.8,en-us;q=0.5,en;q=0.3");
+
+                            //implement below code if token is send to server
+                            con = ConnectServer.getInstance().setHeader(con);
+
                             con.setDoOutput(true);
 
                             String parameter = URLEncoder.encode("title", "UTF-8") + "=" + URLEncoder.encode(title, "UTF-8");
                             parameter += "&" + URLEncoder.encode("content", "UTF-8") + "=" + URLEncoder.encode(content, "UTF-8");
                             parameter += "&" + URLEncoder.encode("isSignNeed", "UTF-8") + "=" + URLEncoder.encode(isSignNeed, "UTF-8");
+                            parameter += "&" + URLEncoder.encode("isImportant", "UTF-8") + "=" + URLEncoder.encode(isImportant, "UTF-8");
 
                             OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
                             wr.write(parameter);
                             wr.flush();
                             BufferedReader rd = null;
-                            requestCode = con.getResponseCode();
 
+                            requestCode = con.getResponseCode();
                             if (requestCode == 200) {
                                 //enroll success
 
@@ -140,12 +172,8 @@ public class BoardNoticeActivity extends AppCompatActivity{
 
                     @Override
                     protected void onPostExecute(Boolean aBoolean) {
-                        if (requestCode == 200) {
-                            finish();
-                        } else {
-                            AlertDialog dialog = createDialogBox(requestMessage);
-                            dialog.show();
-                        }
+                        AlertDialog dialog = createDialogBox(requestCode, requestMessage);
+                        dialog.show();
                     }
                 });
                 ConnectServer.getInstance().execute();
@@ -155,16 +183,22 @@ public class BoardNoticeActivity extends AppCompatActivity{
 
         return true;
     }
-    private AlertDialog createDialogBox(String msg) {
+    private AlertDialog createDialogBox(int requestCode, String msg) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-        builder.setTitle("올리기 실패");
+        if (requestCode == 200) {
+            Toast.makeText(getApplicationContext(), "등록하였습니다.", Toast.LENGTH_LONG).show();
+            onBackPressed();
+        } else {
+            builder.setTitle("등록 실패");
 
-        builder.setMessage("서버와의 통신이 좋지 않습니다.\n다시 시도 해주세요." + msg + "\n");
-        builder.setPositiveButton("확인", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-            }
-        });
+            // 에러 메시지 전송
+            builder.setMessage("서버와의 통신이 원활하지 않습니다.\n 다음에 다시 시도해 주세요." + "\n");
+            builder.setPositiveButton("확인", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                }
+            });
+        }
 
         AlertDialog dialog = builder.create();
         return dialog;

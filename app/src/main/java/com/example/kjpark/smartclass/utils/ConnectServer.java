@@ -2,7 +2,10 @@ package com.example.kjpark.smartclass.utils;
 
 import android.os.AsyncTask;
 
+import com.example.kjpark.smartclass.data.NoticeListData;
+
 import java.net.HttpURLConnection;
+import java.util.List;
 
 /**
  * Created by parkk on 2015-11-20.

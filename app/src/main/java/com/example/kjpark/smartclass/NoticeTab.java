@@ -4,9 +4,11 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -25,7 +27,19 @@ import com.example.kjpark.smartclass.data.NoticeListData;
 import com.example.kjpark.smartclass.utils.ConnectServer;
 import com.github.gcacace.signaturepad.views.SignaturePad;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.w3c.dom.Text;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by KJPARK on 2015-11-15.
@@ -64,6 +78,7 @@ public class NoticeTab extends Fragment{
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         setHasOptionsMenu(true);
 
+        Log.d(TAG, "onCreateView called");
         View view = inflater.inflate(R.layout.tab_notice, container, false);
 
         adapter = new ListViewAdapter(getContext());
@@ -93,39 +108,18 @@ public class NoticeTab extends Fragment{
                 sendButton.setEnabled(false);
             }
         });
-
         clearButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mSignaturePad.clear();
             }
         });
-        sendButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //do send procedure
-                /*
-                Bitmap signatureBitmap = mSignaturePad.getSignatureBitmap();
-                if(addSignatureToGallery(signatureBitmap)) {
-                    Toast.makeText(MainActivity.this, "Signature saved into the Gallery", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(MainActivity.this, "Unable to store the signature", Toast.LENGTH_SHORT).show();
-                }
-                */
-            }
-        });
-        adapter.addNotice(getResources().getDrawable(R.drawable.ic_warning)
-                , "공지qwewqwqeqewqe1"
-                , "2015년 11월 22일"
-                , getResources().getDrawable(R.drawable.ic_sign));
 
-        adapter.addNotice(null
-                , "공지2"
-                , "2015년 11월 23일"
-                , null);
-
+        loadBoards();
         return view;
     }
+
+
     AdapterView.OnItemClickListener ItemClickListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -133,6 +127,13 @@ public class NoticeTab extends Fragment{
 
             final View noticeDialogView = dialogInflater.inflate(R.layout.dialog_noticeitem, null);
 
+            TextView title = (TextView) noticeDialogView.findViewById(R.id.titleTextView);
+            TextView content = (TextView) noticeDialogView.findViewById(R.id.contentTextView);
+            TextView date = (TextView) noticeDialogView.findViewById(R.id.dateTextView);
+
+            title.setText(adapter.mListData.get(position).mTitle);
+            content.setText(adapter.mListData.get(position).mContent);
+            date.setText(adapter.mListData.get(position).mDate);
 
             final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
             builder.setTitle("공지사항");
@@ -141,6 +142,7 @@ public class NoticeTab extends Fragment{
             Button checkButton = (Button) noticeDialogView.findViewById(R.id.checkButton);
 
             final AlertDialog dialog = builder.create();
+
             checkButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -180,15 +182,16 @@ public class NoticeTab extends Fragment{
         public TextView mDate;
         public ImageButton mSignButton;
     }
-    private class ListViewAdapter extends BaseAdapter{
+    private class ListViewAdapter extends BaseAdapter {
 
         private Context mContext;
-        private ArrayList<NoticeListData> mListData = new ArrayList<NoticeListData>();
+        public ArrayList<NoticeListData> mListData = new ArrayList<NoticeListData>();
 
         public ListViewAdapter(Context mContext) {
             super();
             this.mContext = mContext;
         }
+
         @Override
         public int getCount() {
             return mListData.size();
@@ -209,7 +212,7 @@ public class NoticeTab extends Fragment{
         public View getView(int position, View convertView, ViewGroup parent) {
             ViewHolder holder;
 
-            if(convertView == null){
+            if (convertView == null) {
                 holder = new ViewHolder();
 
                 LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -221,23 +224,23 @@ public class NoticeTab extends Fragment{
                 holder.mSignButton = (ImageButton) convertView.findViewById(R.id.signImageButton);
 
                 convertView.setTag(holder);
-            } else{
+            } else {
                 holder = (ViewHolder) convertView.getTag();
             }
             NoticeListData mData = mListData.get(position);
 
             holder.mIcon.setVisibility(View.VISIBLE);
-            if(mData.mIcon != null){
-                holder.mIcon.setImageDrawable(mData.mIcon);
+            if (mData.isImportant) {
+                holder.mIcon.setImageDrawable(getResources().getDrawable(R.drawable.ic_warning));
             }
 
-            if(mData.mSign != null){
+            if (mData.isSignNeed) {
                 holder.mSignButton.setVisibility(View.VISIBLE);
-                holder.mSignButton.setImageDrawable(mData.mSign);
-            } else{
+                holder.mSignButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_sign));
+            } else {
                 holder.mSignButton.setVisibility(View.GONE);
             }
-            if(holder.mSignButton.getVisibility() == View.VISIBLE){
+            if (holder.mSignButton.getVisibility() == View.VISIBLE) {
                 //set the click listener
                 holder.mSignButton.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -259,21 +262,85 @@ public class NoticeTab extends Fragment{
 
             return convertView;
         }
-        public void addNotice(Drawable icon, String mTitle, String mDate, Drawable sign)
+
+        public void addNotice(String mTitle, String mContent, String mDate, Boolean isSignNeed, Boolean isImportant)
         {
             NoticeListData addInfo = new NoticeListData();
-            addInfo.mIcon = icon;
             addInfo.mTitle = mTitle;
+            addInfo.mContent = mContent;
             addInfo.mDate = mDate;
-            addInfo.mSign = sign;
-
+            addInfo.isSignNeed = isSignNeed;
+            addInfo.isImportant = isImportant;
 
             mListData.add(addInfo);
         }
-        public void removeNotice(int position)
-        {
+
+        public void removeNotice(int position) {
             mListData.remove(position);
             adapter.notifyDataSetChanged();
         }
+    }
+    private void loadBoards() {
+        ConnectServer.getInstance().setAsncTask(new AsyncTask<String, Void, Boolean>() {
+            private List<NoticeListData> result = new ArrayList<NoticeListData>();
+
+            @Override
+            protected Boolean doInBackground(String... params) {
+                URL obj = null;
+                try {
+                    obj = new URL("http://165.194.104.22:5000/board_notice");
+                    HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+                    //implement below code if token is send to server
+                    con = ConnectServer.getInstance().setHeader(con);
+
+                    con.setDoOutput(true);
+
+                    OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
+                    wr.flush();
+
+                    BufferedReader rd = null;
+
+                    if (con.getResponseCode() == 200) {
+                        rd = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
+                        String tmpString = rd.readLine();
+
+                        JSONArray jsonArray = new JSONArray(tmpString);
+                        for (int i = 0; i < jsonArray.length(); i++) {
+                            JSONObject object = jsonArray.getJSONObject(i);
+
+                            Integer num = (Integer) object.get("num");
+                            String title = (String) object.get("title");
+                            String content = (String) object.get("content");
+                            String time = (String) object.get("time");
+                            Boolean isSignNeed = ((Integer) object.get("isSignNeed") != 0);
+                            Boolean isImportant = ((Integer) object.get("isImportant") != 0);
+
+                            result.add(new NoticeListData(title, time, content, isSignNeed, isImportant));
+                        }
+                        Log.d("---- success ----", tmpString);
+                    } else {
+                        rd = new BufferedReader(new InputStreamReader(con.getErrorStream(), "UTF-8"));
+                        Log.d("---- failed ----", String.valueOf(rd.readLine()));
+                    }
+                } catch (IOException | JSONException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Boolean value) {
+                for (int i = 0; i < result.size(); i++) {
+                    adapter.addNotice(result.get(i).mTitle
+                            , result.get(i).mContent, result.get(i).mDate
+                            , result.get(i).isSignNeed, result.get(i).isImportant);
+                }
+                Log.d(TAG, "notify called");
+                adapter.notifyDataSetChanged();
+            }
+
+        });
+        ConnectServer.getInstance().execute();
     }
 }
