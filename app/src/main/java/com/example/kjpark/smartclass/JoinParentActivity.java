@@ -207,7 +207,6 @@ public class JoinParentActivity extends AppCompatActivity {
 
                     // 플래그 변경했음.
                     intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-
                     startActivity(intent);
                 }
             });

@@ -1,12 +1,15 @@
 package com.example.kjpark.smartclass;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -16,6 +19,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -23,7 +27,18 @@ import android.widget.TextView;
 import com.example.kjpark.smartclass.data.AssignmentListData;
 import com.example.kjpark.smartclass.utils.ConnectServer;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by KJPARK on 2015-11-15.
@@ -35,7 +50,22 @@ public class AssignmentTab extends Fragment{
 
     private ListView listView;
     private ListViewAdapter adapter;
+    private static final int BOARD_ASSIGNMENT = 1000;
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(resultCode != Activity.RESULT_OK)
+            return;
+
+        switch(requestCode) {
+            case BOARD_ASSIGNMENT: {
+                Log.d(TAG,"BOARD_ASSIGNMENT called");
+                loadBoards();
+            }
+        }
+    }
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -48,14 +78,7 @@ public class AssignmentTab extends Fragment{
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(ItemClickListener);
 
-        adapter.addAssignment(getResources().getDrawable(R.drawable.ic_warning)
-                , "과제1"
-                , "2015/11/22 ~ 2015/11/23");
-
-        adapter.addAssignment(null
-                , "과제2"
-                , "2015/11/22 ~ 2015/11/23");
-
+        loadBoards();
         return view;
     }
     AdapterView.OnItemClickListener ItemClickListener = new AdapterView.OnItemClickListener() {
@@ -63,14 +86,14 @@ public class AssignmentTab extends Fragment{
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             LayoutInflater dialogInflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-            View noticeDialogView = dialogInflater.inflate(R.layout.dialog_assignmentitem, null);
+            View assignmentDialogView = dialogInflater.inflate(R.layout.dialog_assignmentitem, null);
 
 
             AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
             builder.setTitle("과제방");
-            builder.setView(noticeDialogView);
+            builder.setView(assignmentDialogView);
 
-            Button checkButton = (Button) noticeDialogView.findViewById(R.id.checkButton);
+            Button checkButton = (Button) assignmentDialogView.findViewById(R.id.checkButton);
 
             final AlertDialog dialog = builder.create();
             checkButton.setOnClickListener(new View.OnClickListener() {
@@ -98,7 +121,7 @@ public class AssignmentTab extends Fragment{
 
         if(id == R.id.action_write){
             Intent intent = new Intent(getActivity(), BoardAssignmentActivity.class);
-            getActivity().startActivity(intent);
+            startActivityForResult(intent, BOARD_ASSIGNMENT);
         }
 
 
@@ -138,7 +161,7 @@ public class AssignmentTab extends Fragment{
         public View getView(int position, View convertView, ViewGroup parent) {
             ViewHolder holder;
 
-            if(convertView == null){
+            if (convertView == null) {
                 holder = new ViewHolder();
 
                 LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -149,28 +172,29 @@ public class AssignmentTab extends Fragment{
                 holder.mDate = (TextView) convertView.findViewById(R.id.mDate);
 
                 convertView.setTag(holder);
-            } else{
+            } else {
                 holder = (ViewHolder) convertView.getTag();
             }
             AssignmentListData mData = mListData.get(position);
 
-
             holder.mIcon.setVisibility(View.VISIBLE);
-            if(mData.mIcon != null){
-                holder.mIcon.setImageDrawable(mData.mIcon);
+            if (mData.isImportant) {
+                holder.mIcon.setImageDrawable(getResources().getDrawable(R.drawable.ic_warning));
             }
 
             holder.mTitle.setText(mData.mTitle);
-            holder.mDate.setText(mData.mDate);
+            holder.mDate.setText(mData.mStart_date + " ~ " + mData.mEnd_date);
 
             return convertView;
         }
-        public void addAssignment(Drawable icon, String mTitle, String mDate)
+        public void addAssignment(String mTitle, String mContent, String mStart_date, String mEnd_date, Boolean isImportant)
         {
             AssignmentListData addInfo = new AssignmentListData();
-            addInfo.mIcon = icon;
             addInfo.mTitle = mTitle;
-            addInfo.mDate = mDate;
+            addInfo.mContent = mContent;
+            addInfo.mStart_date = mStart_date;
+            addInfo.mEnd_date = mEnd_date;
+            addInfo.isImportant = isImportant;
 
             mListData.add(addInfo);
         }
@@ -179,5 +203,68 @@ public class AssignmentTab extends Fragment{
             mListData.remove(position);
             adapter.notifyDataSetChanged();
         }
+    }
+    private void loadBoards() {
+        ConnectServer.getInstance().setAsncTask(new AsyncTask<String, Void, Boolean>() {
+            private List<AssignmentListData> result = new ArrayList<AssignmentListData>();
+
+            @Override
+            protected Boolean doInBackground(String... params) {
+                URL obj = null;
+                try {
+                    obj = new URL("http://165.194.104.22:5000/board_assignment");
+                    HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+                    //implement below code if token is send to server
+                    con = ConnectServer.getInstance().setHeader(con);
+
+                    con.setDoOutput(true);
+
+                    OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
+                    wr.flush();
+
+                    BufferedReader rd = null;
+
+                    if (con.getResponseCode() == 200) {
+                        rd = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
+                        String tmpString = rd.readLine();
+
+                        JSONArray jsonArray = new JSONArray(tmpString);
+                        for (int i = 0; i < jsonArray.length(); i++) {
+                            JSONObject object = jsonArray.getJSONObject(i);
+
+                            Integer num = (Integer) object.get("num");
+                            String title = (String) object.get("title");
+                            String content = (String) object.get("content");
+                            String start_date = (String) object.get("start_date");
+                            String end_date = (String) object.get("end_date");
+                            Boolean isImportant = ((Integer) object.get("isImportant") != 0);
+
+                            result.add(new AssignmentListData(title, content, start_date, end_date, isImportant));
+                        }
+                        Log.d("---- success ----", tmpString);
+                    } else {
+                        rd = new BufferedReader(new InputStreamReader(con.getErrorStream(), "UTF-8"));
+                        Log.d("---- failed ----", String.valueOf(rd.readLine()));
+                    }
+                } catch (IOException | JSONException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Boolean value) {
+                for (int i = 0; i < result.size(); i++) {
+                    adapter.addAssignment(result.get(i).mTitle
+                            , result.get(i).mContent, result.get(i).mStart_date
+                            , result.get(i).mEnd_date, result.get(i).isImportant);
+                }
+                Log.d(TAG, "notify called");
+                adapter.notifyDataSetChanged();
+            }
+
+        });
+        ConnectServer.getInstance().execute();
     }
 }

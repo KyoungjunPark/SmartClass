@@ -188,7 +188,9 @@ public class BoardNoticeActivity extends AppCompatActivity{
 
         if (requestCode == 200) {
             Toast.makeText(getApplicationContext(), "등록하였습니다.", Toast.LENGTH_LONG).show();
-            onBackPressed();
+            Intent intent = new Intent();
+            setResult(RESULT_OK, intent);
+            finish();
         } else {
             builder.setTitle("등록 실패");
 

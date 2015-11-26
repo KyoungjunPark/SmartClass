@@ -35,8 +35,6 @@ import android.widget.TextView;
 
 import com.example.kjpark.smartclass.utils.ConnectServer;
 
-import org.w3c.dom.Text;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;

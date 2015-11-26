@@ -2,22 +2,38 @@ package com.example.kjpark.smartclass;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckedTextView;
 import android.widget.EditText;
+import android.widget.Toast;
 
+import com.example.kjpark.smartclass.utils.ConnectServer;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 import com.wdullaer.materialdatetimepicker.time.RadialPickerLayout;
 import com.wdullaer.materialdatetimepicker.time.TimePickerDialog;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 /**
  * Created by parkk on 2015-11-17.
@@ -46,9 +62,12 @@ public class BoardAssignmentActivity extends AppCompatActivity implements TimePi
     private Button startTime;
     private Button endDate;
     private Button endTime;
+    private CheckedTextView importanceTextView;
 
     private EditText titleEditText;
     private EditText contentEditText;
+
+    private Boolean isImportanceCheked = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,9 +81,20 @@ public class BoardAssignmentActivity extends AppCompatActivity implements TimePi
         startTime = (Button) findViewById(R.id.startTime);
         endDate = (Button) findViewById(R.id.endDate);
         endTime = (Button) findViewById(R.id.endTime);
+        importanceTextView = (CheckedTextView) findViewById(R.id.importanceTextView);
+        importanceTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isImportanceCheked = !isImportanceCheked;
+                importanceTextView.setChecked(isImportanceCheked);
+            }
+        });
 
         titleEditText = (EditText) findViewById(R.id.titleEditText);
         contentEditText = (EditText) findViewById(R.id.contentEditText);
+
+        setCurrentTime();
+        setOptionMenuSyncChanged();
     }
 
     @Override
@@ -73,12 +103,113 @@ public class BoardAssignmentActivity extends AppCompatActivity implements TimePi
 
         return true;
     }
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
 
+        MenuItem item = menu.findItem(R.id.action_enroll);
+
+        if(isAnyInputExist()) {
+            item.setEnabled(true);
+        }else {
+            item.setEnabled(false);
+        }
+
+        return true;
+    }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        return super.onOptionsItemSelected(item);
-    }
+        int id = item.getItemId();
 
+        if(id == R.id.action_enroll){
+            if(isAnyInputExist()){
+                Log.d(TAG, startDate.getText().toString() + "::::::" + startTime.getText().toString());
+                //send to server the name/ info/ date
+                ConnectServer.getInstance().setAsncTask(new AsyncTask<String, Void, Boolean>() {
+                    private String requestMessage;
+                    private int requestCode;
+                    private String title = titleEditText.getText().toString();
+                    private String content = contentEditText.getText().toString();
+                    private String start_date = startDate.getText().toString() +" "+startTime.getText().toString();
+                    private String end_date = endDate.getText().toString() +" "+ endTime.getText().toString();
+                    private String isImportant = isImportanceCheked.toString();
+
+                    @Override
+                    protected Boolean doInBackground(String... params) {
+                        URL obj = null;
+                        try {
+                            obj = new URL("http://165.194.104.22:5000/enroll_assignment");
+
+                            HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+                            //implement below code if token is send to server
+                            con = ConnectServer.getInstance().setHeader(con);
+
+                            con.setDoOutput(true);
+
+                            String parameter = URLEncoder.encode("title", "UTF-8") + "=" + URLEncoder.encode(title, "UTF-8");
+                            parameter += "&" + URLEncoder.encode("content", "UTF-8") + "=" + URLEncoder.encode(content, "UTF-8");
+                            parameter += "&" + URLEncoder.encode("start_date", "UTF-8") + "=" + URLEncoder.encode(start_date, "UTF-8");
+                            parameter += "&" + URLEncoder.encode("end_date", "UTF-8") + "=" + URLEncoder.encode(end_date, "UTF-8");
+                            parameter += "&" + URLEncoder.encode("isImportant", "UTF-8") + "=" + URLEncoder.encode(isImportant, "UTF-8");
+
+                            OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
+                            wr.write(parameter);
+                            wr.flush();
+                            BufferedReader rd = null;
+
+                            requestCode = con.getResponseCode();
+                            if (requestCode == 200) {
+                                //enroll success
+
+                            } else {
+                                // enroll fail
+                                rd = new BufferedReader(new InputStreamReader(con.getErrorStream(), "UTF-8"));
+
+                                requestMessage = rd.readLine();
+                                Log.d("----- server -----", String.valueOf(rd.readLine()));
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    protected void onPostExecute(Boolean aBoolean) {
+                        AlertDialog dialog = createDialogBox(requestCode, requestMessage);
+                        dialog.show();
+                    }
+                });
+                ConnectServer.getInstance().execute();
+
+            }
+        }
+
+        return true;
+    }
+    private AlertDialog createDialogBox(int requestCode, String msg) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        if (requestCode == 200) {
+            Toast.makeText(getApplicationContext(), "등록하였습니다.", Toast.LENGTH_LONG).show();
+            Intent intent = new Intent();
+            setResult(RESULT_OK, intent);
+            finish();
+        } else {
+            builder.setTitle("등록 실패");
+
+            // 에러 메시지 전송
+            builder.setMessage("서버와의 통신이 원활하지 않습니다.\n 다음에 다시 시도해 주세요." + "\n");
+            builder.setPositiveButton("확인", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                }
+            });
+        }
+
+        AlertDialog dialog = builder.create();
+        return dialog;
+
+    }
     private void setToolbar()
     {
         toolbar = (Toolbar) findViewById(R.id.tool_bar);
@@ -126,31 +257,19 @@ public class BoardAssignmentActivity extends AppCompatActivity implements TimePi
         //Log.d(TAG, view.getTag());
 
         if(view.getTag().equals("StartDatepickerdialog")){
-            String week = getWeek(year, monthOfYear, dayOfMonth);
-            startDate.setText(year+"년 "+monthOfYear+"월 "+dayOfMonth+"일 "+"("+week+")");
+            startDate.setText(year+"/"+monthOfYear+"/"+dayOfMonth);
 
         }else if(view.getTag().equals("EndDatepickerdialog")){
-            String week = getWeek(year, monthOfYear, dayOfMonth);
-            endDate.setText(year+"년 "+monthOfYear+"월 "+dayOfMonth+"일 "+"("+week+")");
+            endDate.setText(year+"/"+monthOfYear+"/"+dayOfMonth);
         }
     }
 
     @Override
     public void onTimeSet(RadialPickerLayout view, int hourOfDay, int minute, int second) {
-        String timeTag = null;
-
-
-        if(hourOfDay >= 12){
-            timeTag = "오후";
-            if(hourOfDay != 12)
-                hourOfDay -= 12;
-        }else{
-            timeTag = "오전";
-        }
         if(this.getFragmentManager().findFragmentByTag("StartTimepickerdialog") != null){
-            startTime.setText(timeTag + " "+hourOfDay+":"+minute);
+            startTime.setText(hourOfDay+":"+minute);
         }else if(this.getFragmentManager().findFragmentByTag("EndTimepickerdialog") != null){
-            endTime.setText(timeTag + " "+hourOfDay+":"+minute);
+            endTime.setText(hourOfDay+":"+minute);
         }
     }
     public void onStartDateClicked(View v){
@@ -197,41 +316,6 @@ public class BoardAssignmentActivity extends AppCompatActivity implements TimePi
         dpd.show(getFragmentManager(), "EndTimepickerdialog");
 
     }
-    private String getWeek(int Year, int Month, int Date)
-    {
-        String week = null;
-
-        Calendar cal = Calendar.getInstance();
-
-        cal.set(Calendar.YEAR, Year);
-        cal.set(Calendar.MONTH, Month);
-        cal.set(Calendar.DATE, Date);
-
-        switch(cal.get(Calendar.DAY_OF_WEEK)){
-            case 1:
-                week = "일";
-                break;
-            case 2:
-                week = "월";
-                break;
-            case 3:
-                week = "화";
-                break;
-            case 4:
-                week = "수";
-                break;
-            case 5:
-                week = "목";
-                break;
-            case 6:
-                week = "금";
-                break;
-            case 7:
-                week = "토";
-                break;
-        }
-        return week;
-    }
     private boolean isAnyInputExist()
     {
         if(titleEditText.getText().toString().equals("")
@@ -274,5 +358,23 @@ public class BoardAssignmentActivity extends AppCompatActivity implements TimePi
                 invalidateOptionsMenu();
             }
         });
+    }
+    private void setCurrentTime()
+    {
+        long now = System.currentTimeMillis();
+        Date date = new Date(now);
+        SimpleDateFormat curDateFormat = new SimpleDateFormat("yyyy/MM/dd",java.util.Locale.getDefault());
+        SimpleDateFormat curTimeFormat = new SimpleDateFormat("HH:MM", java.util.Locale.getDefault());
+
+        String strCurDate = curDateFormat.format(date);
+        String strCurTime = curTimeFormat.format(date);
+
+        startDate.setText(strCurDate);
+        startTime.setText(strCurTime);
+
+        endDate.setText(strCurDate);
+        endTime.setText(strCurTime);
+
+
     }
 }

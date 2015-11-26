@@ -1,8 +1,10 @@
 package com.example.kjpark.smartclass;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -33,6 +35,7 @@ import org.json.JSONObject;
 import org.w3c.dom.Text;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -72,6 +75,23 @@ public class NoticeTab extends Fragment{
     private Button clearButton;
     private Button sendButton;
     private SignaturePad mSignaturePad;
+
+    private static final int BOARD_NOTICE = 1000;
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(resultCode != Activity.RESULT_OK)
+            return;
+
+        switch(requestCode) {
+            case BOARD_NOTICE: {
+                Log.d(TAG,"BOARD_NOTICE called");
+                loadBoards();
+            }
+        }
+    }
 
     @Nullable
     @Override
@@ -118,7 +138,6 @@ public class NoticeTab extends Fragment{
         loadBoards();
         return view;
     }
-
 
     AdapterView.OnItemClickListener ItemClickListener = new AdapterView.OnItemClickListener() {
         @Override
@@ -168,7 +187,7 @@ public class NoticeTab extends Fragment{
 
         if(id == R.id.action_write){
             Intent intent = new Intent(getActivity(), BoardNoticeActivity.class);
-            getActivity().startActivity(intent);
+            startActivityForResult(intent, BOARD_NOTICE);
         }
 
 

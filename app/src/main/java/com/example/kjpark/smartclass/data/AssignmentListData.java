@@ -10,12 +10,21 @@ import java.util.Comparator;
  */
 public class AssignmentListData {
 
-    public Drawable mIcon;
-
     public String mTitle;
+    public String mContent;
+    public String mStart_date;
+    public String mEnd_date;
+    public Boolean isImportant;
 
-    public String mDate;
-
+    public AssignmentListData(){}
+    public AssignmentListData(String mTitle, String mContent, String mStart_date, String mEnd_date, Boolean isImportant)
+    {
+        this.mTitle = mTitle;
+        this.mContent = mContent;
+        this.mStart_date = mStart_date;
+        this.mEnd_date = mEnd_date;
+        this.isImportant = isImportant;
+    }
     //alphabetical order
     public static final Comparator<AssignmentListData> ALPHA_COMPARATOR = new Comparator<AssignmentListData>() {
         private final Collator sCollator = Collator.getInstance();

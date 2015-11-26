@@ -10,11 +10,11 @@ import java.util.Comparator;
  */
 public class NoticeListData {
 
-    public Boolean isImportant;
     public String mTitle;
     public String mDate;
     public String mContent;
     public Boolean isSignNeed;
+    public Boolean isImportant;
 
     public NoticeListData(){}
     public NoticeListData(String mTitle, String mDate, String mContent, Boolean isSignNeed,Boolean isImportant)
