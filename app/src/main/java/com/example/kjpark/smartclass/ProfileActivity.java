@@ -4,6 +4,7 @@
 
 package com.example.kjpark.smartclass;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -11,12 +12,10 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -24,12 +23,10 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -80,15 +77,12 @@ public class ProfileActivity extends AppCompatActivity {
         sexTextView = (TextView) findViewById(R.id.sexTextView);
 
         resizeImage();
-
         setBackgroundImage();
-
         setData();
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
 
         if(resultCode != RESULT_OK)
             return;
@@ -158,7 +152,8 @@ public class ProfileActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onBackPressed();
+                Log.d(TAG, "onBackPressed called");
+                finish();
             }
         });
     }
@@ -264,6 +259,7 @@ public class ProfileActivity extends AppCompatActivity {
         mImageCaptureUri = Uri.fromFile(new File(Environment.getExternalStorageDirectory(), url));
 
         intent.putExtra(MediaStore.EXTRA_OUTPUT, mImageCaptureUri);
+        intent.putExtra("return-data", true);
         startActivityForResult(intent, PICK_FROM_CAMERA);
     }
     private void setData()
@@ -315,13 +311,23 @@ public class ProfileActivity extends AppCompatActivity {
             protected void onPostExecute(Boolean aBoolean) {
                 emailTextView.setText(email);
                 nameTextView.setText(name);
-                registrationTextView.setText(reg_type);
-                sexTextView.setText(sex_type);
+                if(reg_type == "1") {
+                    registrationTextView.setText("선생님");
+                } else if(reg_type == "2"){
+                    registrationTextView.setText("학생");
+                } else{
+                    registrationTextView.setText("학부모");
+                }
+
+                if(sex_type == "0") {
+                    sexTextView.setText("여자");
+                } else{
+                    sexTextView.setText("남자");
+                }
             }
 
         });
         ConnectServer.getInstance().execute();
-
     }
 
 }

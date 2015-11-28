@@ -38,8 +38,8 @@
         android:foregroundGravity="center" />
     <ToggleButton
         android:id="@+id/toggleButton"
-        android:layout_width="100dp"
-        android:layout_height="30dp"
+        android:layout_width="70dp"
+        android:layout_height="20dp"
         android:background="@drawable/bgtoggle"
         android:button="@null"
         android:layout_alignParentRight="true"

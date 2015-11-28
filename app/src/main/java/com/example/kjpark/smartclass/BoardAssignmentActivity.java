@@ -374,7 +374,5 @@ public class BoardAssignmentActivity extends AppCompatActivity implements TimePi
 
         endDate.setText(strCurDate);
         endTime.setText(strCurTime);
-
-
     }
 }

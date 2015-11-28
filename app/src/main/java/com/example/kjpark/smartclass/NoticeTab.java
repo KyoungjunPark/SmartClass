@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -28,19 +29,29 @@ import android.widget.TextView;
 import com.example.kjpark.smartclass.data.NoticeListData;
 import com.example.kjpark.smartclass.utils.ConnectServer;
 import com.github.gcacace.signaturepad.views.SignaturePad;
+import com.squareup.okhttp.MediaType;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.RequestBody;
+import com.squareup.okhttp.Response;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Text;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -78,6 +89,7 @@ public class NoticeTab extends Fragment{
 
     private static final int BOARD_NOTICE = 1000;
 
+    private int currentViewItem = -1;
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -134,7 +146,150 @@ public class NoticeTab extends Fragment{
                 mSignaturePad.clear();
             }
         });
+        sendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //send sign image to server
+                ConnectServer.getInstance().setAsncTask(new AsyncTask<String, Void, Boolean>() {
+                    Bitmap signatureBitmap = mSignaturePad.getSignatureBitmap();
+                    private String num = Integer.toString(currentViewItem);
 
+                    @Override
+                    protected Boolean doInBackground(String... params) {
+                        URL obj = null;
+                        try {
+                            obj = new URL("http://165.194.104.22:5000/enroll_sign");
+                            HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+                            //implement below code if token is send to server
+                            con = ConnectServer.getInstance().setHeader(con);
+
+                            con.setDoOutput(true);
+
+                            String sign_image = encodeTobase64(signatureBitmap);
+                            Log.d(TAG, "sign_image: " + sign_image);
+
+                            String parameter = URLEncoder.encode("num", "UTF-8") + "=" + URLEncoder.encode(num, "UTF-8");
+                            parameter += "&" + URLEncoder.encode("sign_image", "UTF-8") + "=" + URLEncoder.encode(sign_image, "UTF-8");
+
+                            OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
+                            wr.write(parameter);
+                            wr.flush();
+
+                            BufferedReader rd = null;
+
+                            if (con.getResponseCode() == 200) {
+                                // 로그인 성공
+                                rd = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
+                                String token = rd.readLine();
+                                ConnectServer.getInstance().setToken(token);
+
+                                Log.d("---- success ----", token);
+
+
+                            } else {
+                                // 로그인 실패
+                                rd = new BufferedReader(new InputStreamReader(con.getErrorStream(), "UTF-8"));
+                                Log.d("---- failed ----", String.valueOf(rd.readLine()));
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    protected void onPostExecute(Boolean aBoolean) {
+
+                    }
+                });
+                ConnectServer.getInstance().execute();
+
+/*
+                ConnectServer.getInstance().setAsncTask(new AsyncTask<String, Void, Boolean>() {
+                    private Boolean isLoginPermitted = false;
+                    private String requestMessage;
+                    Bitmap signatureBitmap = mSignaturePad.getSignatureBitmap();
+
+                    private String num = Integer.toString(currentViewItem);
+                    String attachmentName = "signature";
+                    String attachmentFileName = "signature.bmp";
+                    String crlf = "\r\n";
+                    String twoHyphens = "--";
+                    String boundary =  "*****";
+
+                    @Override
+                    protected Boolean doInBackground(String... params) {
+                        URL obj = null;
+                        try {
+                            obj = new URL("http://165.194.104.22:5000/enroll_sign");
+                            HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+                            //implement below code if token is send to server
+                            con = ConnectServer.getInstance().setHeader(con);
+                            con.setChunkedStreamingMode(0);
+                            con.setRequestProperty("Connection", "Keep-Alive");
+                            con.setRequestProperty("Cache-Control", "no-cache");
+                            con.setRequestProperty("Content-type", "multipart/form-data; boundary=" + boundary);
+                            con.setUseCaches(false);
+                            con.setDoOutput(true);
+
+                            DataOutputStream request = new DataOutputStream(con.getOutputStream());
+
+                            request.writeBytes(this.twoHyphens + this.boundary + this.crlf);
+                            request.writeBytes("Content-Disposition: form-data; name=\"" +
+                                    this.attachmentName + "\";filename=\"" +
+                                    this.attachmentFileName + "\"" + this.crlf);
+                            request.writeBytes(this.crlf);
+
+                            byte[] pixels = new byte[signatureBitmap.getWidth() * signatureBitmap.getHeight()];
+                            for (int i = 0; i < signatureBitmap.getWidth(); ++i) {
+                                for (int j = 0; j < signatureBitmap.getHeight(); ++j) {
+                                    //we're interested only in the MSB of the first byte,
+                                    //since the other 3 bytes are identical for B&W images
+                                    pixels[i + j] = (byte) ((signatureBitmap.getPixel(i, j) & 0x80) >> 7);
+                                }
+                            }
+                            request.writeBytes(pixels.toString());
+                            request.writeBytes(this.crlf);
+                            request.writeBytes(this.twoHyphens + this.boundary +
+                                    this.twoHyphens + this.crlf);
+
+                            request.flush();
+                            request.close();
+                            con.disconnect();
+
+                            //get response
+                            InputStream responseStream = new
+                                    BufferedInputStream(con.getInputStream());
+
+                            BufferedReader responseStreamReader =
+                                    new BufferedReader(new InputStreamReader(responseStream));
+
+                            String line = "";
+                            StringBuilder stringBuilder = new StringBuilder();
+
+                            while ((line = responseStreamReader.readLine()) != null) {
+                                stringBuilder.append(line).append("\n");
+                            }
+                            responseStreamReader.close();
+
+                            String response = stringBuilder.toString();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    protected void onPostExecute(Boolean aBoolean) {
+
+                    }
+                });
+                ConnectServer.getInstance().execute();
+*/
+            }
+        });
         loadBoards();
         return view;
     }
@@ -153,6 +308,8 @@ public class NoticeTab extends Fragment{
             title.setText(adapter.mListData.get(position).mTitle);
             content.setText(adapter.mListData.get(position).mContent);
             date.setText(adapter.mListData.get(position).mDate);
+
+            currentViewItem = position;
 
             final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
             builder.setTitle("공지사항");
@@ -269,7 +426,8 @@ public class NoticeTab extends Fragment{
                         builder.setTitle("서명란");
                         builder.setView(dialogView);
 
-                        AlertDialog dialog = builder.create();
+
+                        final AlertDialog dialog = builder.create();
                         dialog.show();
 
                     }
@@ -361,5 +519,16 @@ public class NoticeTab extends Fragment{
 
         });
         ConnectServer.getInstance().execute();
+    }
+    public static String encodeTobase64(Bitmap image)
+    {
+        Bitmap immagex=image;
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        immagex.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] b = baos.toByteArray();
+        String imageEncoded = Base64.encodeToString(b, Base64.DEFAULT);
+
+        Log.e("LOOK", imageEncoded);
+        return imageEncoded;
     }
 }

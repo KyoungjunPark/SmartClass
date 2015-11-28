@@ -94,8 +94,9 @@ public class SettingTab extends Fragment{
         int id = item.getItemId();
 
         if(id == R.id.action_user){
+            Log.d(TAG, "ProfileActivity called");
             Intent intent = new Intent(getActivity(), ProfileActivity.class);
-            getActivity().startActivity(intent);
+            startActivity(intent);
         }
 
 

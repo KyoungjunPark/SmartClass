@@ -86,16 +86,24 @@ public class AssignmentTab extends Fragment{
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             LayoutInflater dialogInflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-            View assignmentDialogView = dialogInflater.inflate(R.layout.dialog_assignmentitem, null);
+            final View assignmentDialogView = dialogInflater.inflate(R.layout.dialog_assignmentitem, null);
 
+            TextView title = (TextView) assignmentDialogView.findViewById(R.id.titleTextView);
+            TextView content = (TextView) assignmentDialogView.findViewById(R.id.contentTextView);
+            TextView date = (TextView) assignmentDialogView.findViewById(R.id.dateTextView);
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+            title.setText(adapter.mListData.get(position).mTitle);
+            content.setText(adapter.mListData.get(position).mContent);
+            date.setText(adapter.mListData.get(position).mStart_date + " ~ " + adapter.mListData.get(position).mEnd_date);
+
+            final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
             builder.setTitle("과제방");
             builder.setView(assignmentDialogView);
 
             Button checkButton = (Button) assignmentDialogView.findViewById(R.id.checkButton);
 
             final AlertDialog dialog = builder.create();
+
             checkButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -105,6 +113,7 @@ public class AssignmentTab extends Fragment{
             dialog.show();
         }
     };
+
 
 
     @Override
