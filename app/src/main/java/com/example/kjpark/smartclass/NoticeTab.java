@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -26,27 +25,18 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.example.kjpark.smartclass.adapter.SignListViewAdapter;
 import com.example.kjpark.smartclass.data.NoticeListData;
 import com.example.kjpark.smartclass.utils.ConnectServer;
 import com.github.gcacace.signaturepad.views.SignaturePad;
-import com.squareup.okhttp.MediaType;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.RequestBody;
-import com.squareup.okhttp.Response;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
@@ -77,10 +67,13 @@ import java.util.List;
  */
 public class NoticeTab extends Fragment{
 
-    private final String TAG = "NoticeTab";
+    private final static String TAG = "NoticeTab";
 
-    private ListView listView;
-    private ListViewAdapter adapter;
+    private ListView notice_listView;
+    private ListViewAdapter notice_adapter;
+
+    private ListView sign_listView;
+    private SignListViewAdapter sign_adapter;
 
     private View dialogView;
     private Button clearButton;
@@ -113,10 +106,12 @@ public class NoticeTab extends Fragment{
         Log.d(TAG, "onCreateView called");
         View view = inflater.inflate(R.layout.tab_notice, container, false);
 
-        adapter = new ListViewAdapter(getContext());
-        listView = (ListView) view.findViewById(R.id.listView);
-        listView.setAdapter(adapter);
-        listView.setOnItemClickListener(ItemClickListener);
+        notice_adapter = new ListViewAdapter(getContext());
+        notice_listView = (ListView) view.findViewById(R.id.listView);
+        notice_listView.setAdapter(notice_adapter);
+        notice_listView.setOnItemClickListener(ItemClickListener);
+
+        sign_adapter = new SignListViewAdapter(getContext());
 
         //signature layout setting
         LayoutInflater dialogInflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -166,8 +161,11 @@ public class NoticeTab extends Fragment{
 
                             con.setDoOutput(true);
 
-                            String sign_image = encodeTobase64(signatureBitmap);
-                            Log.d(TAG, "sign_image: " + sign_image);
+                            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                            signatureBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                            byte[] b = baos.toByteArray();
+                            String sign_image = Base64.encodeToString(b, Base64.DEFAULT);
+                            Log.d(TAG, "sign_image: " + sign_image.length());
 
                             String parameter = URLEncoder.encode("num", "UTF-8") + "=" + URLEncoder.encode(num, "UTF-8");
                             parameter += "&" + URLEncoder.encode("sign_image", "UTF-8") + "=" + URLEncoder.encode(sign_image, "UTF-8");
@@ -305,9 +303,9 @@ public class NoticeTab extends Fragment{
             TextView content = (TextView) noticeDialogView.findViewById(R.id.contentTextView);
             TextView date = (TextView) noticeDialogView.findViewById(R.id.dateTextView);
 
-            title.setText(adapter.mListData.get(position).mTitle);
-            content.setText(adapter.mListData.get(position).mContent);
-            date.setText(adapter.mListData.get(position).mDate);
+            title.setText(notice_adapter.mListData.get(position).mTitle);
+            content.setText(notice_adapter.mListData.get(position).mContent);
+            date.setText(notice_adapter.mListData.get(position).mDate);
 
             currentViewItem = position;
 
@@ -411,8 +409,13 @@ public class NoticeTab extends Fragment{
             }
 
             if (mData.isSignNeed) {
-                holder.mSignButton.setVisibility(View.VISIBLE);
-                holder.mSignButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_sign));
+                if(ConnectServer.getInstance().getType() == ConnectServer.Type.teacher){
+                    holder.mSignButton.setVisibility(View.VISIBLE);
+                    holder.mSignButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_sign_list));
+                } else if(ConnectServer.getInstance().getType() == ConnectServer.Type.parent){
+                    holder.mSignButton.setVisibility(View.VISIBLE);
+                    holder.mSignButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_sign));
+                }
             } else {
                 holder.mSignButton.setVisibility(View.GONE);
             }
@@ -422,14 +425,18 @@ public class NoticeTab extends Fragment{
                     @Override
                     public void onClick(View v) {
                         //signature click handling
-                        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                        builder.setTitle("서명란");
-                        builder.setView(dialogView);
 
+                        if (ConnectServer.getInstance().getType() == ConnectServer.Type.teacher) {
+                            Intent intent = new Intent(getContext(), SignListActivity.class);
+                            startActivity(intent);
+                        } else if (ConnectServer.getInstance().getType() == ConnectServer.Type.parent) {
 
-                        final AlertDialog dialog = builder.create();
-                        dialog.show();
-
+                            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                            builder.setTitle("서명란");
+                            builder.setView(dialogView);
+                            final AlertDialog dialog = builder.create();
+                            dialog.show();
+                        }
                     }
                 });
             }
@@ -454,7 +461,7 @@ public class NoticeTab extends Fragment{
 
         public void removeNotice(int position) {
             mListData.remove(position);
-            adapter.notifyDataSetChanged();
+            notice_adapter.notifyDataSetChanged();
         }
     }
     private void loadBoards() {
@@ -509,26 +516,15 @@ public class NoticeTab extends Fragment{
             @Override
             protected void onPostExecute(Boolean value) {
                 for (int i = 0; i < result.size(); i++) {
-                    adapter.addNotice(result.get(i).mTitle
+                    notice_adapter.addNotice(result.get(i).mTitle
                             , result.get(i).mContent, result.get(i).mDate
                             , result.get(i).isSignNeed, result.get(i).isImportant);
                 }
                 Log.d(TAG, "notify called");
-                adapter.notifyDataSetChanged();
+                notice_adapter.notifyDataSetChanged();
             }
 
         });
         ConnectServer.getInstance().execute();
-    }
-    public static String encodeTobase64(Bitmap image)
-    {
-        Bitmap immagex=image;
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        immagex.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-        byte[] b = baos.toByteArray();
-        String imageEncoded = Base64.encodeToString(b, Base64.DEFAULT);
-
-        Log.e("LOOK", imageEncoded);
-        return imageEncoded;
     }
 }

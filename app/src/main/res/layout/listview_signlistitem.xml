@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="15dp" >
+
+    <TextView
+        android:id="@+id/mName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:text="이름"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        />
+
+    <TextView
+        android:id="@+id/mInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="서명 여부: "
+        android:textSize="18sp"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="#8b8989"
+        android:gravity="center_horizontal"
+        android:layout_alignTop="@+id/arrowImageView"
+        android:layout_toLeftOf="@+id/arrowImageView"
+        android:layout_toStartOf="@+id/arrowImageView" />
+    <TextView
+        android:id="@+id/mIsSigned"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="YES"
+        android:textSize="18sp"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:foregroundGravity="center" />
+
+</RelativeLayout>

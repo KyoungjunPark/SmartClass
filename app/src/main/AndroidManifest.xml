@@ -82,6 +82,10 @@
             android:label="@string/codeInfo"
             android:theme="@style/AppTheme.NoActionBar" >
         </activity>
+        <activity android:name=".SignListActivity"
+            android:label="@string/codeInfo"
+            android:theme="@style/Theme.AppCompat.Dialog" >
+        </activity>
     </application>
 
 </manifest>
