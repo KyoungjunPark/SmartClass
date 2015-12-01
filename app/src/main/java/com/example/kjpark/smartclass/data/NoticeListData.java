@@ -15,16 +15,18 @@ public class NoticeListData {
     public String mContent;
     public Boolean isSignNeed;
     public Boolean isImportant;
+    public Boolean isSignFinished;
 
     public NoticeListData(){}
-    public NoticeListData(String mTitle, String mDate, String mContent, Boolean isSignNeed,Boolean isImportant)
+    public NoticeListData(String mTitle, String mDate, String mContent, Boolean isSignNeed
+            ,Boolean isImportant, Boolean isSignFinished)
     {
         this.mTitle = mTitle;
         this.mDate = mDate;
         this.mContent = mContent;
         this.isSignNeed = isSignNeed;
-
         this.isImportant = isImportant;
+        this.isSignFinished = isSignFinished;
     }
     //alphabetical order
     public static final Comparator<NoticeListData> ALPHA_COMPARATOR = new Comparator<NoticeListData>() {

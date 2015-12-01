@@ -35,10 +35,9 @@ public class ViewPagerAdapter extends FragmentStatePagerAdapter {
             return new AssignmentTab();
         else if(position == 2)
             return new MemoryTab();
-        else if(position == 3)
-            return new MessageTab();
         else {
             return new SettingTab();
+            //return new MessageTab();
         }
 
     }

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF">
+
+    <include
+        android:id="@+id/tool_bar"
+        layout="@layout/toolbar_board"
+        >
+    </include>
+
+    <EditText
+        android:id="@+id/contentEditText"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:layout_weight="0.23"
+        android:hint="글쓰기..."
+        android:textSize="20sp"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:gravity="start|top"
+        android:capitalize="sentences"
+        android:typeface="normal"
+
+        />
+    <ImageView
+        android:id="@+id/imageImageView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.5"
+        android:src="@color/white"
+        android:contentDescription="이미지"
+        />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <ImageButton
+            android:id="@+id/cameraImageButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:contentDescription="camera button"
+            android:src="@drawable/ic_camera_gray"
+            android:background="@android:color/transparent"
+            android:onClick="onCameraImageButtonClicked"
+            />
+    </LinearLayout>
+</LinearLayout>

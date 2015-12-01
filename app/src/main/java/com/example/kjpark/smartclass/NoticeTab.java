@@ -79,6 +79,7 @@ public class NoticeTab extends Fragment{
     private Button clearButton;
     private Button sendButton;
     private SignaturePad mSignaturePad;
+    private  AlertDialog signature_dialog;
 
     private static final int BOARD_NOTICE = 1000;
 
@@ -114,180 +115,8 @@ public class NoticeTab extends Fragment{
         sign_adapter = new SignListViewAdapter(getContext());
 
         //signature layout setting
-        LayoutInflater dialogInflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        setSignatureLayout();
 
-        dialogView = dialogInflater.inflate(R.layout.dialog_signature, null);
-        mSignaturePad = (SignaturePad) dialogView.findViewById(R.id.signature_pad);
-
-        clearButton = (Button) dialogView.findViewById(R.id.clearButton);
-        sendButton = (Button) dialogView.findViewById(R.id.sendButton);
-
-        mSignaturePad.setOnSignedListener(new SignaturePad.OnSignedListener() {
-            @Override
-            public void onSigned() {
-                clearButton.setEnabled(true);
-                sendButton.setEnabled(true);
-            }
-
-            @Override
-            public void onClear() {
-                clearButton.setEnabled(false);
-                sendButton.setEnabled(false);
-            }
-        });
-        clearButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mSignaturePad.clear();
-            }
-        });
-        sendButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //send sign image to server
-                ConnectServer.getInstance().setAsncTask(new AsyncTask<String, Void, Boolean>() {
-                    Bitmap signatureBitmap = mSignaturePad.getSignatureBitmap();
-                    private String num = Integer.toString(currentViewItem);
-
-                    @Override
-                    protected Boolean doInBackground(String... params) {
-                        URL obj = null;
-                        try {
-                            obj = new URL("http://165.194.104.22:5000/enroll_sign");
-                            HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-
-                            //implement below code if token is send to server
-                            con = ConnectServer.getInstance().setHeader(con);
-
-                            con.setDoOutput(true);
-
-                            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                            signatureBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-                            byte[] b = baos.toByteArray();
-                            String sign_image = Base64.encodeToString(b, Base64.DEFAULT);
-                            Log.d(TAG, "sign_image: " + sign_image.length());
-
-                            String parameter = URLEncoder.encode("num", "UTF-8") + "=" + URLEncoder.encode(num, "UTF-8");
-                            parameter += "&" + URLEncoder.encode("sign_image", "UTF-8") + "=" + URLEncoder.encode(sign_image, "UTF-8");
-
-                            OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
-                            wr.write(parameter);
-                            wr.flush();
-
-                            BufferedReader rd = null;
-
-                            if (con.getResponseCode() == 200) {
-                                // 로그인 성공
-                                rd = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
-                                String token = rd.readLine();
-                                ConnectServer.getInstance().setToken(token);
-
-                                Log.d("---- success ----", token);
-
-
-                            } else {
-                                // 로그인 실패
-                                rd = new BufferedReader(new InputStreamReader(con.getErrorStream(), "UTF-8"));
-                                Log.d("---- failed ----", String.valueOf(rd.readLine()));
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        return null;
-                    }
-
-                    @Override
-                    protected void onPostExecute(Boolean aBoolean) {
-
-                    }
-                });
-                ConnectServer.getInstance().execute();
-
-/*
-                ConnectServer.getInstance().setAsncTask(new AsyncTask<String, Void, Boolean>() {
-                    private Boolean isLoginPermitted = false;
-                    private String requestMessage;
-                    Bitmap signatureBitmap = mSignaturePad.getSignatureBitmap();
-
-                    private String num = Integer.toString(currentViewItem);
-                    String attachmentName = "signature";
-                    String attachmentFileName = "signature.bmp";
-                    String crlf = "\r\n";
-                    String twoHyphens = "--";
-                    String boundary =  "*****";
-
-                    @Override
-                    protected Boolean doInBackground(String... params) {
-                        URL obj = null;
-                        try {
-                            obj = new URL("http://165.194.104.22:5000/enroll_sign");
-                            HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-
-                            //implement below code if token is send to server
-                            con = ConnectServer.getInstance().setHeader(con);
-                            con.setChunkedStreamingMode(0);
-                            con.setRequestProperty("Connection", "Keep-Alive");
-                            con.setRequestProperty("Cache-Control", "no-cache");
-                            con.setRequestProperty("Content-type", "multipart/form-data; boundary=" + boundary);
-                            con.setUseCaches(false);
-                            con.setDoOutput(true);
-
-                            DataOutputStream request = new DataOutputStream(con.getOutputStream());
-
-                            request.writeBytes(this.twoHyphens + this.boundary + this.crlf);
-                            request.writeBytes("Content-Disposition: form-data; name=\"" +
-                                    this.attachmentName + "\";filename=\"" +
-                                    this.attachmentFileName + "\"" + this.crlf);
-                            request.writeBytes(this.crlf);
-
-                            byte[] pixels = new byte[signatureBitmap.getWidth() * signatureBitmap.getHeight()];
-                            for (int i = 0; i < signatureBitmap.getWidth(); ++i) {
-                                for (int j = 0; j < signatureBitmap.getHeight(); ++j) {
-                                    //we're interested only in the MSB of the first byte,
-                                    //since the other 3 bytes are identical for B&W images
-                                    pixels[i + j] = (byte) ((signatureBitmap.getPixel(i, j) & 0x80) >> 7);
-                                }
-                            }
-                            request.writeBytes(pixels.toString());
-                            request.writeBytes(this.crlf);
-                            request.writeBytes(this.twoHyphens + this.boundary +
-                                    this.twoHyphens + this.crlf);
-
-                            request.flush();
-                            request.close();
-                            con.disconnect();
-
-                            //get response
-                            InputStream responseStream = new
-                                    BufferedInputStream(con.getInputStream());
-
-                            BufferedReader responseStreamReader =
-                                    new BufferedReader(new InputStreamReader(responseStream));
-
-                            String line = "";
-                            StringBuilder stringBuilder = new StringBuilder();
-
-                            while ((line = responseStreamReader.readLine()) != null) {
-                                stringBuilder.append(line).append("\n");
-                            }
-                            responseStreamReader.close();
-
-                            String response = stringBuilder.toString();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        return null;
-                    }
-
-                    @Override
-                    protected void onPostExecute(Boolean aBoolean) {
-
-                    }
-                });
-                ConnectServer.getInstance().execute();
-*/
-            }
-        });
         loadBoards();
         return view;
     }
@@ -383,7 +212,7 @@ public class NoticeTab extends Fragment{
 
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
+        public View getView(final int position, View convertView, ViewGroup parent) {
             ViewHolder holder;
 
             if (convertView == null) {
@@ -413,8 +242,14 @@ public class NoticeTab extends Fragment{
                     holder.mSignButton.setVisibility(View.VISIBLE);
                     holder.mSignButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_sign_list));
                 } else if(ConnectServer.getInstance().getType() == ConnectServer.Type.parent){
-                    holder.mSignButton.setVisibility(View.VISIBLE);
-                    holder.mSignButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_sign));
+                    if(mData.isSignFinished){
+                        holder.mSignButton.setVisibility(View.VISIBLE);
+                        holder.mSignButton.setEnabled(false);
+                        holder.mSignButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_sign_after));
+                    }else{
+                        holder.mSignButton.setVisibility(View.VISIBLE);
+                        holder.mSignButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_sign));
+                    }
                 }
             } else {
                 holder.mSignButton.setVisibility(View.GONE);
@@ -425,17 +260,18 @@ public class NoticeTab extends Fragment{
                     @Override
                     public void onClick(View v) {
                         //signature click handling
-
+                        currentViewItem = position;
                         if (ConnectServer.getInstance().getType() == ConnectServer.Type.teacher) {
                             Intent intent = new Intent(getContext(), SignListActivity.class);
+                            intent.putExtra("position", currentViewItem);
                             startActivity(intent);
                         } else if (ConnectServer.getInstance().getType() == ConnectServer.Type.parent) {
-
+                            setSignatureLayout();
                             AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                             builder.setTitle("서명란");
                             builder.setView(dialogView);
-                            final AlertDialog dialog = builder.create();
-                            dialog.show();
+                            signature_dialog = builder.create();
+                            signature_dialog.show();
                         }
                     }
                 });
@@ -447,7 +283,8 @@ public class NoticeTab extends Fragment{
             return convertView;
         }
 
-        public void addNotice(String mTitle, String mContent, String mDate, Boolean isSignNeed, Boolean isImportant)
+        public void addNotice(String mTitle, String mContent, String mDate, Boolean isSignNeed
+                , Boolean isImportant, Boolean isSignFinished)
         {
             NoticeListData addInfo = new NoticeListData();
             addInfo.mTitle = mTitle;
@@ -455,6 +292,7 @@ public class NoticeTab extends Fragment{
             addInfo.mDate = mDate;
             addInfo.isSignNeed = isSignNeed;
             addInfo.isImportant = isImportant;
+            addInfo.isSignFinished = isSignFinished;
 
             mListData.add(addInfo);
         }
@@ -499,8 +337,9 @@ public class NoticeTab extends Fragment{
                             String time = (String) object.get("time");
                             Boolean isSignNeed = ((Integer) object.get("isSignNeed") != 0);
                             Boolean isImportant = ((Integer) object.get("isImportant") != 0);
+                            Boolean isSignFinished = ((Integer) object.get("isSignFinished") != 0);
 
-                            result.add(new NoticeListData(title, time, content, isSignNeed, isImportant));
+                            result.add(new NoticeListData(title, time, content, isSignNeed, isImportant, isSignFinished));
                         }
                         Log.d("---- success ----", tmpString);
                     } else {
@@ -515,10 +354,12 @@ public class NoticeTab extends Fragment{
 
             @Override
             protected void onPostExecute(Boolean value) {
+                notice_adapter = new ListViewAdapter(getContext());
+                notice_listView.setAdapter(notice_adapter);
                 for (int i = 0; i < result.size(); i++) {
                     notice_adapter.addNotice(result.get(i).mTitle
                             , result.get(i).mContent, result.get(i).mDate
-                            , result.get(i).isSignNeed, result.get(i).isImportant);
+                            , result.get(i).isSignNeed, result.get(i).isImportant, result.get(i).isSignFinished);
                 }
                 Log.d(TAG, "notify called");
                 notice_adapter.notifyDataSetChanged();
@@ -526,5 +367,98 @@ public class NoticeTab extends Fragment{
 
         });
         ConnectServer.getInstance().execute();
+    }
+    private void setSignatureLayout()
+    {
+        LayoutInflater dialogInflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+        dialogView = dialogInflater.inflate(R.layout.dialog_signature, null);
+        mSignaturePad = (SignaturePad) dialogView.findViewById(R.id.signature_pad);
+
+        clearButton = (Button) dialogView.findViewById(R.id.clearButton);
+        sendButton = (Button) dialogView.findViewById(R.id.sendButton);
+
+        mSignaturePad.setOnSignedListener(new SignaturePad.OnSignedListener() {
+            @Override
+            public void onSigned() {
+                clearButton.setEnabled(true);
+                sendButton.setEnabled(true);
+            }
+
+            @Override
+            public void onClear() {
+                clearButton.setEnabled(false);
+                sendButton.setEnabled(false);
+            }
+        });
+        clearButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mSignaturePad.clear();
+            }
+        });
+        sendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //send sign image to server
+                ConnectServer.getInstance().setAsncTask(new AsyncTask<String, Void, Boolean>() {
+                    Bitmap signatureBitmap = mSignaturePad.getSignatureBitmap();
+                    private String num = Integer.toString(currentViewItem);
+
+                    @Override
+                    protected Boolean doInBackground(String... params) {
+                        URL obj = null;
+                        try {
+                            obj = new URL("http://165.194.104.22:5000/enroll_sign");
+                            HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+                            //implement below code if token is send to server
+                            con = ConnectServer.getInstance().setHeader(con);
+
+                            con.setDoOutput(true);
+
+                            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                            signatureBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                            byte[] b = baos.toByteArray();
+                            String sign_image = Base64.encodeToString(b, Base64.DEFAULT);
+                            Log.d(TAG, "sign_image: " + sign_image.length());
+
+                            String parameter = URLEncoder.encode("num", "UTF-8") + "=" + URLEncoder.encode(num, "UTF-8");
+                            parameter += "&" + URLEncoder.encode("sign_image", "UTF-8") + "=" + URLEncoder.encode(sign_image, "UTF-8");
+
+                            OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
+                            wr.write(parameter);
+                            wr.flush();
+
+                            BufferedReader rd = null;
+
+                            if (con.getResponseCode() == 200) {
+                                // 등록 성공
+                                rd = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
+
+                                Log.d("---- success ----", rd.toString());
+
+
+                            } else {
+                                // 로그인 실패
+                                rd = new BufferedReader(new InputStreamReader(con.getErrorStream(), "UTF-8"));
+                                Log.d("---- failed ----", String.valueOf(rd.readLine()));
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    protected void onPostExecute(Boolean aBoolean) {
+
+                    }
+                });
+                ConnectServer.getInstance().execute();
+                signature_dialog.dismiss();
+                loadBoards();
+            }
+        });
     }
 }

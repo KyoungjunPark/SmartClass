@@ -11,14 +11,12 @@ import java.util.Comparator;
 public class SignListData {
 
     public String mName;
-    public int mIsSigned;
     public Bitmap mSignImage;
 
     public SignListData(){}
-    public SignListData(String mName, int mIsSigned, Bitmap mSignImage)
+    public SignListData(String mName,Bitmap mSignImage)
     {
         this.mName = mName;
-        this.mIsSigned = mIsSigned;
         this.mSignImage = mSignImage;
     }
     //alphabetical order

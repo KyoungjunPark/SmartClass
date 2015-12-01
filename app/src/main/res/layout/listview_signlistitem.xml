@@ -11,25 +11,16 @@
         android:textSize="18sp"
         android:text="이름"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        />
+        android:layout_marginBottom="56dp"
+        android:layout_alignBottom="@+id/mIsSigned"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
-    <TextView
-        android:id="@+id/mInfo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="서명 여부: "
-        android:textSize="18sp"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="#8b8989"
-        android:gravity="center_horizontal"
-        android:layout_alignTop="@+id/arrowImageView"
-        android:layout_toLeftOf="@+id/arrowImageView"
-        android:layout_toStartOf="@+id/arrowImageView" />
-    <TextView
+    <ImageView
         android:id="@+id/mIsSigned"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="YES"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:contentDescription="sign_image"
         android:textSize="18sp"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:layout_alignParentRight="true"

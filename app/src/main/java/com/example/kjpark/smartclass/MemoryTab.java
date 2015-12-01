@@ -1,33 +1,37 @@
 package com.example.kjpark.smartclass;
 
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
+import android.app.Activity;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
-import com.android.volley.Cache;
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.VolleyLog;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.example.kjpark.smartclass.adapter.FeedListAdapter;
-import com.example.kjpark.smartclass.app.AppController;
-import com.example.kjpark.smartclass.data.FeedItem;
+import com.example.kjpark.smartclass.data.FeedListData;
 import com.example.kjpark.smartclass.utils.ConnectServer;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,9 +45,10 @@ public class MemoryTab extends Fragment{
     private static final String TAG = "MemoryTab";
     private ListView listView;
     private FeedListAdapter adapter;
-    private List<FeedItem> feedItems;
+    private List<FeedListData> feedListDatas;
     private String URL_FEED = "http://api.androidhive.info/feed/feed.json";
 
+    private static final int BOARD_MEMORY = 1000;
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -52,87 +57,123 @@ public class MemoryTab extends Fragment{
         View view = inflater.inflate(R.layout.tab_memory, container, false);
 
         listView = (ListView) view.findViewById(R.id.listView);
-        feedItems = new ArrayList<>();
+        feedListDatas = new ArrayList<>();
 
-        adapter = new FeedListAdapter(getActivity(), feedItems);
+        adapter = new FeedListAdapter(getActivity(), feedListDatas);
         listView.setAdapter(adapter);
 
-
-        //getActivity().getActionBar().setBackgroundDrawable(new ColorDrawable(Color.parseColor("#3b5998")));
-        //getActivity().getActionBar().setIcon(new ColorDrawable(getResources().getColor(android.R.color.transparent)));
-
-        Cache cache = AppController.getInstance().getRequestQueue().getCache();
-        Cache.Entry entry = cache.get(URL_FEED);
-        if(entry != null){
-            try {
-                String data = new String(entry.data, "UTF-8");
-                parseJsonFeed(new JSONObject(data));
-            } catch (UnsupportedEncodingException | JSONException e) {
-                e.printStackTrace();
-            }
-        } else {
-            JsonObjectRequest jsonRequest = new JsonObjectRequest(Request.Method.GET, URL_FEED, null, new Response.Listener<JSONObject>() {
-                @Override
-                public void onResponse(JSONObject response) {
-                    VolleyLog.d(TAG, "Response: " + response.toString());
-                    if (response != null) {
-                        parseJsonFeed(response);
-                    }
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    VolleyLog.d(TAG, "Error: " + error.getMessage());
-                }
-            });
-
-            AppController.getInstance().addToRequestQueue(jsonRequest);
-        }
-
-
+        loadBoards();
         return view;
 
     }
-    private void parseJsonFeed(JSONObject response) {
-        try {
-            JSONArray feedArray = response.getJSONArray("feed");
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
 
-            for (int i = 0; i < feedArray.length(); i++) {
-                JSONObject feedObj = (JSONObject) feedArray.get(i);
+        if(resultCode != Activity.RESULT_OK)
+            return;
 
-                FeedItem item = new FeedItem();
-                item.setId(feedObj.getInt("id"));
-                item.setName(feedObj.getString("name"));
-
-                // Image might be null sometimes
-                String image = feedObj.isNull("image") ? null : feedObj
-                        .getString("image");
-                item.setImge(image);
-                item.setStatus(feedObj.getString("status"));
-                item.setProfilePic(feedObj.getString("profilePic"));
-                item.setTimeStamp(feedObj.getString("timeStamp"));
-
-                // url might be null sometimes
-                String feedUrl = feedObj.isNull("url") ? null : feedObj
-                        .getString("url");
-                item.setUrl(feedUrl);
-
-                feedItems.add(item);
+        switch(requestCode) {
+            case BOARD_MEMORY: {
+                Log.d(TAG, "BOARD_MEMORY called");
+                loadBoards();
             }
-
-            // notify data changes to list adapter
-            adapter.notifyDataSetChanged();
-        } catch (JSONException e) {
-            e.printStackTrace();
         }
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if(id == R.id.action_write){
+            Intent intent = new Intent(getActivity(), BoardMemoryActivity.class);
+            startActivityForResult(intent, BOARD_MEMORY);
+        }
+        return true;
     }
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.menu_enroll, menu);
         if(ConnectServer.getInstance().getType() != ConnectServer.Type.teacher) {
-            menu.removeItem(R.id.action_enroll);
+            menu.removeItem(R.id.action_write);
         }
         super.onCreateOptionsMenu(menu, inflater);
     }
+    private void loadBoards() {
+        ConnectServer.getInstance().setAsncTask(new AsyncTask<String, Void, Boolean>() {
+            private List<FeedListData> result = new ArrayList<FeedListData>();
 
+            @Override
+            protected Boolean doInBackground(String... params) {
+                URL obj = null;
+                try {
+                    obj = new URL("http://165.194.104.22:5000/board_memory");
+                    HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+                    //implement below code if token is send to server
+                    con = ConnectServer.getInstance().setHeader(con);
+
+                    con.setDoOutput(true);
+
+                    OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
+                    wr.flush();
+
+                    BufferedReader rd = null;
+
+                    if (con.getResponseCode() == 200) {
+                        rd = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
+                        String tmpString = rd.readLine();
+
+                        JSONArray jsonArray = new JSONArray(tmpString);
+                        for (int i = 0; i < jsonArray.length(); i++) {
+                            JSONObject object = jsonArray.getJSONObject(i);
+
+                            Integer num = (Integer) object.get("num");
+                            String name = (String) object.get("name");
+                            String content = (String) object.get("content");
+                            String image_data = (String) object.get("image");
+                            String profilePic_data = (String) object.get("profilePic");
+
+                            byte[] b;
+                            Bitmap image = null;
+                            if (!image_data.equals("")) {
+                                b = Base64.decode(image_data, Base64.DEFAULT);
+                                image = BitmapFactory.decodeByteArray(b, 0, b.length);
+                            }
+                            Bitmap profilePic = null;
+                            if(!profilePic_data.equals("")) {
+                                b = Base64.decode(profilePic_data, Base64.DEFAULT);
+                                profilePic = BitmapFactory.decodeByteArray(b, 0, b.length);
+                            }
+                            String time = (String) object.get("time");
+
+                            result.add(new FeedListData(num, name, content, image, profilePic, time));
+                        }
+                        Log.d("---- success ----", tmpString);
+                    } else {
+                        rd = new BufferedReader(new InputStreamReader(con.getErrorStream(), "UTF-8"));
+                        Log.d("---- failed ----", String.valueOf(rd.readLine()));
+                    }
+                } catch (IOException | JSONException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Boolean value) {
+                feedListDatas = new ArrayList<>();
+                adapter = new FeedListAdapter(getActivity(), feedListDatas);
+                listView.setAdapter(adapter);
+                for (int i = 0; i < result.size(); i++) {
+                    adapter.addFeed(result.get(i).getNum()
+                            , result.get(i).getName(), result.get(i).getContent()
+                            , result.get(i).getImage(), result.get(i).getProfilePic(), result.get(i).getTime());
+                }
+
+                Log.d(TAG, "notify called");
+                adapter.notifyDataSetChanged();
+            }
+        });
+        ConnectServer.getInstance().execute();
+    }
 }

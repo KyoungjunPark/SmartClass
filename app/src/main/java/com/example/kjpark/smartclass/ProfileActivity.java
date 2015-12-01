@@ -23,6 +23,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -30,15 +31,22 @@ import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.example.kjpark.smartclass.data.NoticeListData;
 import com.example.kjpark.smartclass.utils.ConnectServer;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 
 public class ProfileActivity extends AppCompatActivity {
 
@@ -93,8 +101,63 @@ public class ProfileActivity extends AppCompatActivity {
                 final Bundle extras = data.getExtras();
 
                 if(extras != null){
-                    Bitmap photo = extras.getParcelable("data");
-                    profileImageView.setImageBitmap(photo);
+                    final Bitmap signatureBitmap = extras.getParcelable("data");
+                    //send photo to server
+                    ConnectServer.getInstance().setAsncTask(new AsyncTask<String, Void, Boolean>() {
+
+                        @Override
+                        protected Boolean doInBackground(String... params) {
+                            URL obj = null;
+                            try {
+                                obj = new URL("http://165.194.104.22:5000/enroll_profile_image");
+                                HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+                                //implement below code if token is send to server
+                                con = ConnectServer.getInstance().setHeader(con);
+
+                                con.setDoOutput(true);
+
+                                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+                                assert signatureBitmap != null;
+                                signatureBitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+                                byte[] b = baos.toByteArray();
+                                String profile_image = Base64.encodeToString(b, Base64.DEFAULT);
+                                Log.d(TAG, "pofile_image: " + profile_image.length());
+
+                                String parameter = URLEncoder.encode("profile_image", "UTF-8") + "=" + URLEncoder.encode(profile_image, "UTF-8");
+
+                                OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
+                                wr.write(parameter);
+                                wr.flush();
+
+                                BufferedReader rd = null;
+
+                                if (con.getResponseCode() == 200) {
+                                    // 등록 성공
+                                    rd = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
+                                    Log.d("---- success ----", rd.toString());
+
+
+                                } else {
+                                    // 등록 실패
+                                    rd = new BufferedReader(new InputStreamReader(con.getErrorStream(), "UTF-8"));
+                                    Log.d("---- failed ----", String.valueOf(rd.readLine()));
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            return null;
+                        }
+
+                        @Override
+                        protected void onPostExecute(Boolean aBoolean) {
+
+                        }
+                    });
+                    ConnectServer.getInstance().execute();
+
+                    profileImageView.setImageBitmap(signatureBitmap);
                 }
 
                 File f = new File(mImageCaptureUri.getPath());
@@ -159,14 +222,13 @@ public class ProfileActivity extends AppCompatActivity {
     }
     private void resizeImage()
     {
-        Bitmap bmp = decodeSampledBitmapFromResource(getResources(), R.drawable.profile, 500, 500);
+        Bitmap bmp = decodeSampledBitmapFromResource(getResources(), R.drawable.ic_default_profile_image, 500, 500);
         profileImageView.setImageBitmap(bmp);
     }
     private void setBackgroundImage()
     {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
-
         Bitmap bmp = decodeSampledBitmapFromResource(getResources(), R.drawable.profile_background, 200, 100);
         bmp = toGrayScale(bmp);
         BitmapDrawable bmpDrawable = new BitmapDrawable(getResources(), bmp);
@@ -267,8 +329,9 @@ public class ProfileActivity extends AppCompatActivity {
         ConnectServer.getInstance().setAsncTask(new AsyncTask<String, Void, Boolean>() {
             private String email;
             private String name;
-            private String reg_type;
-            private String sex_type;
+            private Integer reg_type;
+            private Integer sex_type;
+            private Bitmap profileBitmap;
 
             @Override
             protected Boolean doInBackground(String... params) {
@@ -290,18 +353,25 @@ public class ProfileActivity extends AppCompatActivity {
                     if (con.getResponseCode() == 200) {
                         rd = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
                         String tmpString = rd.readLine();
-                        String[] codes = tmpString.split("/");
 
-                        email = codes[0];
-                        name = codes[1];
-                        reg_type = codes[2];
-                        sex_type = codes[3];
+                        JSONArray jsonArray = new JSONArray(tmpString);
+                        JSONObject object = jsonArray.getJSONObject(0);
+
+                        email = (String) object.get("email");
+                        name = (String) object.get("name");
+                        reg_type = (Integer) object.get("reg_type");
+                        sex_type = (Integer) object.get("sex_type");
+
+                        String profile_image = (String) object.get("profile_image");
+                        byte[] b = Base64.decode(profile_image, Base64.DEFAULT);
+                        profileBitmap = BitmapFactory.decodeByteArray(b, 0, b.length);
+
                         Log.d("---- success ----", tmpString);
                     } else {
                         rd = new BufferedReader(new InputStreamReader(con.getErrorStream(), "UTF-8"));
                         Log.d("---- failed ----", String.valueOf(rd.readLine()));
                     }
-                } catch (IOException e) {
+                } catch (IOException | JSONException e) {
                     e.printStackTrace();
                 }
                 return null;
@@ -311,15 +381,16 @@ public class ProfileActivity extends AppCompatActivity {
             protected void onPostExecute(Boolean aBoolean) {
                 emailTextView.setText(email);
                 nameTextView.setText(name);
-                if(reg_type == "1") {
+                profileImageView.setImageBitmap(profileBitmap);
+                if(reg_type == 1) {
                     registrationTextView.setText("선생님");
-                } else if(reg_type == "2"){
+                } else if(reg_type == 2){
                     registrationTextView.setText("학생");
                 } else{
                     registrationTextView.setText("학부모");
                 }
 
-                if(sex_type == "0") {
+                if(sex_type == 0) {
                     sexTextView.setText("여자");
                 } else{
                     sexTextView.setText("남자");

@@ -2,14 +2,14 @@ package com.example.kjpark.smartclass.adapter;
 
 import android.app.Activity;
 import android.content.Context;
-import android.text.Html;
+import android.graphics.Bitmap;
 import android.text.TextUtils;
-import android.text.format.DateUtils;
-import android.text.method.LinkMovementMethod;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.volley.toolbox.ImageLoader;
@@ -17,7 +17,8 @@ import com.android.volley.toolbox.NetworkImageView;
 import com.example.kjpark.smartclass.FeedImageView;
 import com.example.kjpark.smartclass.R;
 import com.example.kjpark.smartclass.app.AppController;
-import com.example.kjpark.smartclass.data.FeedItem;
+import com.example.kjpark.smartclass.data.FeedListData;
+import com.example.kjpark.smartclass.data.NoticeListData;
 
 import java.util.List;
 
@@ -27,24 +28,25 @@ import java.util.List;
  * @since 0.1
  */
 public class FeedListAdapter extends BaseAdapter {
+    private final static String TAG = "FeedListAdapter";
     private Activity activity;
     private LayoutInflater inflater;
-    private List<FeedItem> feedItems;
-    ImageLoader imageLoader = AppController.getInstance().getImageLoader();
+    private List<FeedListData> feedListDatas;
 
-    public FeedListAdapter(Activity activity, List<FeedItem> feedItems) {
+    public FeedListAdapter(Activity activity, List<FeedListData> feedListDatas) {
         this.activity = activity;
-        this.feedItems = feedItems;
+        this.feedListDatas = feedListDatas;
     }
+
 
     @Override
     public int getCount() {
-        return feedItems.size();
+        return feedListDatas.size();
     }
 
     @Override
     public Object getItem(int location) {
-        return feedItems.get(location);
+        return feedListDatas.get(location);
     }
 
     @Override
@@ -61,74 +63,57 @@ public class FeedListAdapter extends BaseAdapter {
         if (convertView == null)
             convertView = inflater.inflate(R.layout.listview_memoryitem, null);
 
-        if (imageLoader == null)
-            imageLoader = AppController.getInstance().getImageLoader();
 
         TextView name = (TextView) convertView.findViewById(R.id.name);
-        TextView timestamp = (TextView) convertView
-                .findViewById(R.id.timestamp);
-        TextView statusMsg = (TextView) convertView
-                .findViewById(R.id.txtStatusMsg);
-        TextView url = (TextView) convertView.findViewById(R.id.txtUrl);
-        NetworkImageView profilePic = (NetworkImageView) convertView
+        TextView content = (TextView) convertView
+                .findViewById(R.id.content);
+        TextView time = (TextView) convertView
+                .findViewById(R.id.time);
+        ImageView profilePic = (ImageView) convertView
                 .findViewById(R.id.profilePic);
-        FeedImageView feedImageView = (FeedImageView) convertView
+        ImageView feedImageView = (ImageView) convertView
                 .findViewById(R.id.feedImage1);
 
-        FeedItem item = feedItems.get(position);
+        FeedListData item = feedListDatas.get(position);
 
         name.setText(item.getName());
+        time.setText(item.getTime());
 
-        // Converting timestamp into x ago format
-        CharSequence timeAgo = DateUtils.getRelativeTimeSpanString(
-                Long.parseLong(item.getTimeStamp()),
-                System.currentTimeMillis(), DateUtils.SECOND_IN_MILLIS);
-        timestamp.setText(timeAgo);
-
-        // Chcek for empty status message
-        if (!TextUtils.isEmpty(item.getStatus())) {
-            statusMsg.setText(item.getStatus());
-            statusMsg.setVisibility(View.VISIBLE);
+        // Chcek for empty content message
+        if (!TextUtils.isEmpty(item.getContent())) {
+            content.setText(item.getContent());
+            content.setVisibility(View.VISIBLE);
         } else {
             // status is empty, remove from view
-            statusMsg.setVisibility(View.GONE);
-        }
-
-        // Checking for null feed url
-        if (item.getUrl() != null) {
-            url.setText(Html.fromHtml("<a href=\"" + item.getUrl() + "\">"
-                    + item.getUrl() + "</a> "));
-
-            // Making url clickable
-            url.setMovementMethod(LinkMovementMethod.getInstance());
-            url.setVisibility(View.VISIBLE);
-        } else {
-            // url is null, remove from the view
-            url.setVisibility(View.GONE);
+            content.setVisibility(View.GONE);
         }
 
         // user profile pic
-        profilePic.setImageUrl(item.getProfilePic(), imageLoader);
+        profilePic.setImageBitmap(item.getProfilePic());
+        profilePic.setVisibility(View.VISIBLE);
 
         // Feed image
-        if (item.getImge() != null) {
-            feedImageView.setImageUrl(item.getImge(), imageLoader);
+        if (item.getImage() != null) {
+            feedImageView.setImageBitmap(item.getImage());
             feedImageView.setVisibility(View.VISIBLE);
-            feedImageView
-                    .setResponseObserver(new FeedImageView.ResponseObserver() {
-                        @Override
-                        public void onError() {
-                        }
 
-                        @Override
-                        public void onSuccess() {
-                        }
-                    });
         } else {
+            Log.e(TAG,"FUCK!!");
             feedImageView.setVisibility(View.GONE);
         }
 
         return convertView;
     }
+    public void addFeed(int num, String name, String content, Bitmap image, Bitmap profilePic, String time)
+    {
+        FeedListData addInfo = new FeedListData();
+        addInfo.setNum(num);
+        addInfo.setName(name);
+        addInfo.setContent(content);
+        addInfo.setImage(image);
+        addInfo.setProfilePic(profilePic);
+        addInfo.setTime(time);
 
+        feedListDatas.add(addInfo);
+    }
 }

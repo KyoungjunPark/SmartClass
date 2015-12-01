@@ -1,10 +1,13 @@
 package com.example.kjpark.smartclass.adapter;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.media.Image;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.kjpark.smartclass.R;
@@ -51,7 +54,7 @@ public class SignListViewAdapter extends BaseAdapter {
             convertView = inflater.inflate(R.layout.listview_signlistitem, null);
 
             holder.mName = (TextView) convertView.findViewById(R.id.mName);
-            holder.mIsSigned = (TextView) convertView.findViewById(R.id.mIsSigned);
+            holder.mIsSigned = (ImageView) convertView.findViewById(R.id.mIsSigned);
 
             convertView.setTag(holder);
         } else{
@@ -60,16 +63,15 @@ public class SignListViewAdapter extends BaseAdapter {
         SignListData mData = mListData.get(position);
 
         holder.mName.setText(mData.mName);
-
-        holder.mIsSigned.setText(mData.mIsSigned);
-
+        //holder.mIsSigned.setText("O");
+        holder.mIsSigned.setImageBitmap(mData.mSignImage);
         return convertView;
     }
-    public void addNotice(String mName, int mIsSigned)
+    public void addNotice(String mName, Bitmap sign_image)
     {
         SignListData addInfo = new SignListData();
         addInfo.mName = mName;
-        addInfo.mIsSigned = mIsSigned;
+        addInfo.mSignImage = sign_image;
         mListData.add(addInfo);
     }
     public void removeNotice(int position)
@@ -79,6 +81,6 @@ public class SignListViewAdapter extends BaseAdapter {
     public class ViewHolder
     {
         public TextView mName;
-        public TextView mIsSigned;
+        public ImageView mIsSigned;
     }
 }

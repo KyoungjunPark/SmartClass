@@ -36,4 +36,5 @@ dependencies {
     compile 'com.mcxiaoke.volley:library-aar:1.0.0'
     testCompile 'com.squareup.okhttp:mockwebserver:2.6.0'
     compile 'com.squareup.okhttp:okhttp:2.6.0'
+    compile 'com.google.android.gms:play-services:8.3.0'
 }
