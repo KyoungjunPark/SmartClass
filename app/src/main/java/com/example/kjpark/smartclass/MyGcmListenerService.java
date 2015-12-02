@@ -22,8 +22,8 @@ public class MyGcmListenerService extends GcmListenerService{
 
     @Override
     public void onMessageReceived(String from, Bundle data) {
-        String title = data.getString("title");
-        String message = data.getString("message");
+        String title = data.getString("board_type");
+        String message = data.getString("title");
 
         Log.d(TAG, "From: " + from);
         Log.d(TAG, "Title: " + title);
@@ -62,25 +62,6 @@ public class MyGcmListenerService extends GcmListenerService{
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
-    }
-
-    private AlertDialog createDialogBox(){
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
-        //builder.setTitle("WHOOZ COME");
-        //builder.setMessage("방문자가 있습니다.");
-        //builder.setIcon(R.drawable.login_page_background);
-
-        builder.setPositiveButton("예", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int whichButton) {
-                dialog.cancel();
-            }
-        });
-
-        AlertDialog dialog = builder.create();
-
-        return dialog;
     }
 
 }

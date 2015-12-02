@@ -21,6 +21,8 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.example.kjpark.smartclass.data.SettingListData;
+import com.example.kjpark.smartclass.services.GetPhoneStateService;
+import com.example.kjpark.smartclass.services.PhoneStateService;
 import com.example.kjpark.smartclass.utils.ConnectServer;
 
 import java.util.ArrayList;
@@ -37,7 +39,7 @@ public class SettingTab extends Fragment{
     private ListView listView;
     private ListViewAdapter adapter;
 
-
+    private Intent serviceIntent;
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -165,10 +167,12 @@ public class SettingTab extends Fragment{
                     @Override
                     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                         if(isChecked){
-                            //send server to change state
-
+                            Log.d(TAG,"mode start");
+                            serviceIntent = new Intent(getActivity(), GetPhoneStateService.class);
+                            getActivity().startService(serviceIntent);
                         } else {
-
+                            Log.d(TAG,"mode stop");
+                            getActivity().stopService(serviceIntent);
                         }
                     }
                 });

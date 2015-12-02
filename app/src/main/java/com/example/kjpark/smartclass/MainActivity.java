@@ -19,6 +19,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.kjpark.smartclass.adapter.ViewPagerAdapter;
+import com.example.kjpark.smartclass.services.PhoneStateService;
 import com.example.kjpark.smartclass.utils.ConnectServer;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -70,6 +71,12 @@ public class MainActivity extends AppCompatActivity {
         });
 
         tabs.setViewPager(viewPager);
+
+        if(ConnectServer.getInstance().getType() == ConnectServer.Type.student) {
+            //set phoneState service
+            Intent serviceIntent = new Intent(this, PhoneStateService.class);
+            startService(serviceIntent);
+        }
 
         registBroadcastReceiver();
         getInstanceIdToken();
@@ -147,7 +154,6 @@ public class MainActivity extends AppCompatActivity {
 
                         @Override
                         protected Boolean doInBackground(String... params) {
-
                             URL obj = null;
                             try {
                                 obj = new URL("http://165.194.104.22:5000/gcm");
@@ -182,7 +188,6 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
                     ConnectServer.getInstance().execute();
-
                 }
             }
         };

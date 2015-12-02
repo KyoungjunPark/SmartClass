@@ -21,7 +21,7 @@ public class ConnectServer {
 
     private static final ConnectServer instance = new ConnectServer();
 
-    private ConnectServer(){}
+    public ConnectServer(){}
     public static ConnectServer getInstance(){ return instance;}
     public void setAsncTask(AsyncTask<String, Void, Boolean> task) { this.task = task;}
     public void setToken(String token){this.token = token;}

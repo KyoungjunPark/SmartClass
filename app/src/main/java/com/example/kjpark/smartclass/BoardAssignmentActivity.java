@@ -194,6 +194,7 @@ public class BoardAssignmentActivity extends AppCompatActivity implements TimePi
             Toast.makeText(getApplicationContext(), "등록하였습니다.", Toast.LENGTH_LONG).show();
             Intent intent = new Intent();
             setResult(RESULT_OK, intent);
+            intent.putExtra("title", titleEditText.getText().toString());
             finish();
         } else {
             builder.setTitle("등록 실패");

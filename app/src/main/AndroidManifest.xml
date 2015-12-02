@@ -135,6 +135,19 @@
         </service>
         <!-- [END gcm_registration_service] -->
 
+        <service android:name=".services.PhoneStateService">
+            <intent-filter>
+                <action android:name="com.example.kjpark.smartclass.services"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </service>
+
+        <service android:name=".services.GetPhoneStateService">
+            <intent-filter>
+                <action android:name="com.example.kjpark.smartclass.services"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

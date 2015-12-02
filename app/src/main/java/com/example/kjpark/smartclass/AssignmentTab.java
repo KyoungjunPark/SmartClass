@@ -37,6 +37,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,7 +54,7 @@ public class AssignmentTab extends Fragment{
     private static final int BOARD_ASSIGNMENT = 1000;
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, final Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         if(resultCode != Activity.RESULT_OK)
@@ -63,6 +64,46 @@ public class AssignmentTab extends Fragment{
             case BOARD_ASSIGNMENT: {
                 Log.d(TAG,"BOARD_ASSIGNMENT called");
                 loadBoards();
+                ConnectServer.getInstance().setAsncTask(new AsyncTask<String, Void, Boolean>() {
+                    String title = data.getStringExtra("title");
+
+                    @Override
+                    protected Boolean doInBackground(String... params) {
+                        URL obj = null;
+                        try {
+                            obj = new URL("http://165.194.104.22:5000/send_gcm");
+                            HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+                            //implement below code if token is send to server
+                            con = ConnectServer.getInstance().setHeader(con);
+
+                            con.setDoOutput(true);
+
+                            String parameter = URLEncoder.encode("title", "UTF-8") + "=" + URLEncoder.encode(title, "UTF-8");
+                            parameter += "&" + URLEncoder.encode("board_type", "UTF-8") + "=" + URLEncoder.encode("assignment", "UTF-8");
+
+
+                            OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
+                            wr.write(parameter);
+                            wr.flush();
+
+                            if (con.getResponseCode() == 200) {
+                                Log.d(TAG, "---- success ----");
+                            } else {
+                                Log.d(TAG, "---- failed ----");
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    protected void onPostExecute(Boolean value) {
+                    }
+
+                });
+                ConnectServer.getInstance().execute();
             }
         }
     }
